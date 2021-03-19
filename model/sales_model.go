@@ -1,14 +1,15 @@
 package model
 
 type Audit struct {
-	CreatedAt				string		`json:"createdAt"`
-	UpdatedAt				string		`json:"updatedAt"`
+	CreatedAt 				string		`json:"createdAt"`
+	UpdatedAt 				string		`json:"updatedAt"`
 }
 
 type CategoryProduct struct {
 	CategoryProductId		string		`json:"categoryProductId"`
 	Category				string		`json:"category"`
 	Audit					string		`json:"audit"`
+
 }
 
 type Product struct {
