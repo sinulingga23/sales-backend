@@ -77,3 +77,70 @@ CREATE TABLE `address` (
   ON UPDATE CASCADE ON DELETE NO ACTION
 );
 
+CREATE TABLE `customer` (
+  customer_id VARCHAR(25) NOT NULL,
+  address_id INT NULL,
+  first_name VARCHAR(75) NOT NULL,
+  last_name VARCHAR(75) NULL,
+  gender VARCHAR(3) NULL,
+  address VARCHAR(150) NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  phone_number VARCHAR(25) NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NULL,
+  PRIMARY KEY(customer_id),
+  CONSTRAINT `customer_address_id` FOREIGN KEY(address_id)
+  REFERENCES address(address_id)
+  ON UPDATE CASCADE ON DELETE NO ACTION
+);
+
+CREATE TABLE `employee` (
+  employee_id VARCHAR(25) NOT NULL,
+  address_id INT NULL,
+  first_name VARCHAR(75) NOT NULL,
+  last_name VARCHAR(75) NULL,
+  gender VARCHAR(3) NULL,
+  address VARCHAR(150) NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  phone_number VARCHAR(25) NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NULL,
+  PRIMARY KEY(employee_id),
+  CONSTRAINT `employee_address_id` FOREIGN KEY(address_id)
+  REFERENCES address(address_id)
+  ON UPDATE CASCADE ON DELETE NO ACTION
+);
+
+CREATE TABLE `transaction` (
+  transaction_id  VARCHAR(25) NOT NULL,
+  customer_id VARCHAR(25) NULL,
+  employee_id VARCHAR(25) NULL,
+  date DATE NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NULL,
+  PRIMARY KEY(transaction_id),
+  CONSTRAINT `transaction_customer_id_foreign` FOREIGN KEY(customer_id)
+  REFERENCES customer(customer_id)
+  ON UPDATE CASCADE ON DELETE NO ACTION,
+
+  CONSTRAINT `transaction_employee_id_foreign` FOREIGN KEY(employee_id)
+  REFERENCES employee(employee_id)
+  ON UPDATE CASCADE ON DELETE NO ACTION
+);
+
+CREATE TABLE `transaction_detail` (
+  transaction_detail_id VARCHAR(25) NOT NULL,
+  transaction_id VARCHAR(25) NULL,
+  product_id VARCHAR(25) NULL,
+  price DECIMAL(19,2) NOT NULL,
+  quantity INT NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NULL,
+  CONSTRAINT `transaction_detail_transaction_id_foreign` FOREIGN KEY(transaction_id)
+  REFERENCES transaction(transaction_id)
+  ON UPDATE CASCADE ON DELETE NO ACTION,
+
+  CONSTRAINT `transaction_detail_product_id_foreign` FOREIGN KEY(product_id)
+  REFERENCES product(product_id)
+  ON UPDATE CASCADE ON DELETE NO ACTION
+);
