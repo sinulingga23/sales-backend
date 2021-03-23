@@ -29,15 +29,22 @@ func main() {
 	// fmt.Println(init2)
 	// fmt.Println(init3)
 
-	repo := model.CategoryProduct{}
-	listCategoryProduct, err := repo.FindAllCategoryProduct()
-	if err != nil {
-		fmt.Println(err)
-	}
-	for i := 0; i < len(listCategoryProduct); i++ {
-		// fmt.Println(*listCategoryProduct[i])
-		instance := *listCategoryProduct[i]
-		instance.Category = "New Category Again Again"
-		instance.UpdateCategoryProduct()
-	}
+	// repo := model.CategoryProduct{}
+	// listCategoryProduct, err := repo.FindAllCategoryProduct()
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// for i := 0; i < len(listCategoryProduct); i++ {
+	// 	// fmt.Println(*listCategoryProduct[i])
+	// 	instance := *listCategoryProduct[i]
+	// 	instance.Category = "New Category Again Again"
+	// 	instance.UpdateCategoryProduct()
+	// }
+
+	// repo := model.CategoryProduct{}
+	// actualResult, err := repo.IsCategoryProductExists("CTG0000001")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// fmt.Println(actualResult)
 }

@@ -1,9 +1,9 @@
 package utility
 
 import (
-	"database/sql"
 	"os"
 	"fmt"
+	"database/sql"
 
 	_ "github.com/go-sql-driver/mysql"
 )

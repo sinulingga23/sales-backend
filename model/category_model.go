@@ -21,10 +21,13 @@ func (c *CategoryProduct) IsCategoryProductExists(categoryProductId string) (boo
 	}
 	defer db.Close()
 
+	if categoryProductId == "" {
+		return false, errors.New("CategoryProductId can't be empty")
+	}
+
 	check := 0
 	err = db.QueryRow("SELECT COUNT(category_product_id) FROM category_product WHERE category_product_id = ?",
-		categoryProductId).
-		Scan(&check)
+		categoryProductId).Scan(&check)
 
 	if err != nil {
 		return false, errors.New("Somethings wrong!")
