@@ -14,8 +14,8 @@ type CategoryProduct struct {
 	Audit             	Audit  `json:"audit"`
 }
 
-func (c *CategoryProduct) IsCategoryProductExists(categoryProductId string) (bool, error) {
-	db, err := utility.ConnectDB();
+func (c *CategoryProduct) IsCategoryProductExistsById(categoryProductId string) (bool, error) {
+	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, err
 	}
@@ -28,7 +28,6 @@ func (c *CategoryProduct) IsCategoryProductExists(categoryProductId string) (boo
 	check := 0
 	err = db.QueryRow("SELECT COUNT(category_product_id) FROM category_product WHERE category_product_id = ?",
 		categoryProductId).Scan(&check)
-
 	if err != nil {
 		return false, errors.New("Somethings wrong!")
 	}
@@ -89,7 +88,7 @@ func (c *CategoryProduct) SaveCategoryProduct() (*CategoryProduct, error) {
 }
 
 func (c *CategoryProduct) FindCategoryProductById(categoryProductId string) (*CategoryProduct, error) {
-	isThere , err := c.IsCategoryProductExists(categoryProductId)
+	isThere , err := c.IsCategoryProductExistsById(categoryProductId)
 	if err != nil {
 		return &CategoryProduct{}, err
 	}
@@ -147,7 +146,7 @@ func (c *CategoryProduct) UpdateCategoryProduct() (*CategoryProduct, error) {
 }
 
 func (c *CategoryProduct) DeleteCategoryProductById(categoryProductId string) (bool, error) {
-	isThere, err := c.IsCategoryProductExists(categoryProductId)
+	isThere, err := c.IsCategoryProductExistsById(categoryProductId)
 	if err != nil {
 		return false, err
 	}

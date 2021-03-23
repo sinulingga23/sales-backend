@@ -18,9 +18,9 @@ func loadEnv() {
 	}
 }
 
-// TODO: TestTestIsCategoryProductExists_InputNotString
+// TODO: TestTestIsCategoryProductExistsById_InputNotString
 
-func TestIsCategoryProductExists_Exists(t *testing.T) {
+func TestIsCategoryProductExistsById_Exists(t *testing.T) {
 	loadEnv()
 
 	assert := assert.New(t)
@@ -31,17 +31,17 @@ func TestIsCategoryProductExists_Exists(t *testing.T) {
 	expectedResult2 := true
 	expectedResult3 := true
 
-	actualResult1, err := categoryProductModel.IsCategoryProductExists("CTG0000001")
+	actualResult1, err := categoryProductModel.IsCategoryProductExistsById("CTG0000001")
 	if err != nil {
 		log.Printf("%s", err)
 	}
 
-	actualResult2, err := categoryProductModel.IsCategoryProductExists("CTG0000002")
+	actualResult2, err := categoryProductModel.IsCategoryProductExistsById("CTG0000002")
 	if err != nil {
 		log.Printf("%s", err)
 	}
 
-	actualResult3, err := categoryProductModel.IsCategoryProductExists("CTG0000003")
+	actualResult3, err := categoryProductModel.IsCategoryProductExistsById("CTG0000003")
 	if err != nil {
 		log.Printf("%s", err)
 	}
@@ -51,7 +51,7 @@ func TestIsCategoryProductExists_Exists(t *testing.T) {
 	assert.Equal(expectedResult3, actualResult3, "They should be equal")
 }
 
-func TestIsCategoryProductExists_NotExists(t *testing.T) {
+func TestIsCategoryProductExistsByIdById_NotExists(t *testing.T) {
 	loadEnv()
 
 	assert := assert.New(t)
@@ -70,17 +70,17 @@ func TestIsCategoryProductExists_NotExists(t *testing.T) {
 	actualMessageResult2 := ""
 	actualMessageResult3 := ""
 
-	actualValueResult1, err1 := categoryProductModel.IsCategoryProductExists("CTG0000010")
+	actualValueResult1, err1 := categoryProductModel.IsCategoryProductExistsById("CTG0000010")
 	if err1 != nil {
 		actualMessageResult1 = fmt.Sprintf("%s", err1)
 	}
 
-	actualValueResult2, err2 := categoryProductModel.IsCategoryProductExists("CTG0000011")
+	actualValueResult2, err2 := categoryProductModel.IsCategoryProductExistsById("CTG0000011")
 	if err2 != nil {
 		actualMessageResult2 = fmt.Sprintf("%s", err2)
 	}
 
-	actualValueResult3, err3 := categoryProductModel.IsCategoryProductExists("CTG0000012")
+	actualValueResult3, err3 := categoryProductModel.IsCategoryProductExistsById("CTG0000012")
 	if err3 != nil {
 		actualMessageResult3 = fmt.Sprintf("%s", err3)
 	}
@@ -95,7 +95,7 @@ func TestIsCategoryProductExists_NotExists(t *testing.T) {
 	assert.NotEqual(true, actualValueResult3, "They should not be equal")
 }
 
-func TestIsCategoryProductExists_InputEmpty(t *testing.T) {
+func TestIsCategoryProductExistsById_InputEmpty(t *testing.T) {
 	loadEnv()
 
 	assert := assert.New(t)
@@ -114,17 +114,17 @@ func TestIsCategoryProductExists_InputEmpty(t *testing.T) {
 	actualMessageResult2 := ""
 	actualMessageResult3 := ""
 
-	actualValueResult1, err1 := categoryProductModel.IsCategoryProductExists(categoryProductId1)
+	actualValueResult1, err1 := categoryProductModel.IsCategoryProductExistsById(categoryProductId1)
 	if err1 != nil {
 		actualMessageResult1 = fmt.Sprintf("%s", err1)
 	}
 
-	actualValueResult2, err2 := categoryProductModel.IsCategoryProductExists(categoryProductId2)
+	actualValueResult2, err2 := categoryProductModel.IsCategoryProductExistsById(categoryProductId2)
 	if err2 != nil {
 		actualMessageResult2 = fmt.Sprintf("%s", err2)
 	}
 
-	actualValueResult3, err3 := categoryProductModel.IsCategoryProductExists(categoryProductId3)
+	actualValueResult3, err3 := categoryProductModel.IsCategoryProductExistsById(categoryProductId3)
 	if err3 != nil {
 		actualMessageResult3 = fmt.Sprintf("%s", err3)
 	}
