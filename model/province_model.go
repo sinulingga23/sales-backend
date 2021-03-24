@@ -40,7 +40,7 @@ func (p *Province) IsProvinceExists(provinceId string) (bool, error) {
 	return false, errors.New(fmt.Sprintf("Can't find province with id: %s", provinceId))
 }
 
-func (p *Province) SaveProvince() (&Province, error) {
+func (p *Province) SaveProvince() (*Province, error) {
 	// Make sure the important fields is not empty
 	if p.Province == "" {
 		return &Province{}, errors.New("Province name can't be empty")
