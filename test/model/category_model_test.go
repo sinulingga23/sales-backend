@@ -137,3 +137,45 @@ func TestIsCategoryProductExistsById_InputEmpty(t *testing.T) {
 	assert.NotEqual(true, actualValueResult2, "They should not be equal")
 	assert.NotEqual(true, actualValueResult3, "They should not be equal")
 }
+
+func TestSaveCategoryProduct_Empty(t *testing.T) {
+	loadEnv()
+
+	assert := assert.New(t)
+
+	expectedMessageResult1 := "Category name can't be empty"
+	expectedMessageResult2 := "Category name can't be empty"
+	expectedMessageResult3 := "Category name can't be empty"
+
+	actualMessageResult1 := ""
+	actualMessageResult2 := ""
+	actualMessageResult3 := ""
+
+	saveModel1 := model.CategoryProduct{}
+	saveModel1.Category = ""
+	actualModel1, err1 := saveModel1.SaveCategoryProduct()
+	if err1 != nil {
+		actualMessageResult1 = fmt.Sprintf("%s", err1)
+	}
+
+	saveModel2 := model.CategoryProduct{}
+	actualModel2, err2 := saveModel2.SaveCategoryProduct()
+	if err2 != nil {
+		actualMessageResult2 = fmt.Sprintf("%s", err2)
+	}
+
+	saveModel3 := model.CategoryProduct{}
+	saveModel3.Category = "    "
+	actualModel3, err3 := saveModel3.SaveCategoryProduct()
+	if err3 != nil {
+		actualMessageResult3 = fmt.Sprintf("%s", err3)
+	}
+
+	assert.Equal(expectedMessageResult1, actualMessageResult1, "They should be equal")
+	assert.Equal(expectedMessageResult2, actualMessageResult2, "They should be equal")
+	assert.Equal(expectedMessageResult3, actualMessageResult3, "They should be equal")
+
+	assert.Equal(&model.CategoryProduct{}, actualModel1, "They should be equal")
+	assert.Equal(&model.CategoryProduct{}, actualModel2, "They should be equal")
+	assert.Equal(&model.CategoryProduct{}, actualModel3, "They should be equal")
+}

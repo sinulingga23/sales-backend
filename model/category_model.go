@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 	"sales-backend/utility"
+	"strings"
 )
 
 
@@ -41,7 +42,7 @@ func (c *CategoryProduct) IsCategoryProductExistsById(categoryProductId string) 
 
 func (c *CategoryProduct) SaveCategoryProduct() (*CategoryProduct, error) {
 	// Make sure the important field is not empty
-	if c.Category == "" {
+	if strings.Trim(c.Category, " ") == "" || len(c.Category) == 0 {
 		return &CategoryProduct{}, errors.New("Category name can't be empty")
 	}
 

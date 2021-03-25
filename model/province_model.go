@@ -57,32 +57,20 @@ func (p *Province) SaveProvince() (*Province, error) {
 	}
 	defer db.Close()
 
-	// Get the number rows of province
-	number := 0
-	err = db.QueryRow("SELECT COUNT(province_id) FROM province").Scan(&number)
-	if err != nil {
-		return &Province{}, err
-	}
-
-	// generate the category_product_id
-	count := utility.DigitsCount(number)
-	formatProvinceId := "CTG00000000"
-	provinceId := "CTG"
-	for i := 0; i<len(formatProvinceId)-count-5; i++ {
-		provinceId += "0"
-	}
-	number += 1
-	provinceId += fmt.Sprintf("%d", number)
-	p.ProvinceId = provinceId
-
-	_, err = db.Exec("INSERT INTO province (province_id, province, created_at) VALUES (?, ?, ?)",
-		p.ProvinceId,
+	result, err := db.Exec("INSERT INTO province (province, created_at) VALUES (?, ?)",
 		p.Province,
 		p.Audit.CreatedAt)
 
-	if err != nil {
-		return &Province, errors.New("Somethings wrong!")
+	if err != nil  || result != nil {
+		return &Province{}, errors.New("Somethings wrong!")
 	}
+
+	currentId, err := result.LastInsertId()
+	if err != nil {
+		return &Province{}, errors.New("Somethings wrong!")
+	}
+
+	p.ProvinceId = int(currentId)
 
 	return p, nil
 }
