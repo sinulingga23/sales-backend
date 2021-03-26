@@ -18,8 +18,6 @@ func loadEnv() {
 	}
 }
 
-// TODO: TestTestIsCategoryProductExistsById_InputNotString
-
 func TestIsCategoryProductExistsById_Exists(t *testing.T) {
 	loadEnv()
 
@@ -167,6 +165,119 @@ func TestSaveCategoryProduct_Empty(t *testing.T) {
 	saveModel3 := model.CategoryProduct{}
 	saveModel3.Category = "    "
 	actualModel3, err3 := saveModel3.SaveCategoryProduct()
+	if err3 != nil {
+		actualMessageResult3 = fmt.Sprintf("%s", err3)
+	}
+
+	assert.Equal(expectedMessageResult1, actualMessageResult1, "They should be equal")
+	assert.Equal(expectedMessageResult2, actualMessageResult2, "They should be equal")
+	assert.Equal(expectedMessageResult3, actualMessageResult3, "They should be equal")
+
+	assert.Equal(&model.CategoryProduct{}, actualModel1, "They should be equal")
+	assert.Equal(&model.CategoryProduct{}, actualModel2, "They should be equal")
+	assert.Equal(&model.CategoryProduct{}, actualModel3, "They should be equal")
+}
+
+func TestSaveCategoryProduct_Success(t *testing.T) {
+	loadEnv()
+
+	assert := assert.New(t)
+
+	saveModel1 := model.CategoryProduct{}
+	saveModel1.Category = "Technology"
+	actualModel1, err1 := saveModel1.SaveCategoryProduct()
+	if err1 != nil {
+		log.Printf("%s", err1)
+	}
+
+	saveModel2 := model.CategoryProduct{}
+	saveModel2.Category = "Health"
+	actualModel2, err2 := saveModel2.SaveCategoryProduct()
+	if err2 != nil {
+		log.Printf("%s", err2)
+	}
+
+	saveModel3 := model.CategoryProduct{}
+	saveModel3.Category = "Sport"
+	actualModel3, err3 := saveModel3.SaveCategoryProduct()
+	if err3 != nil {
+		log.Printf("%s", err3)
+	}
+
+	assert.NotEqual(&model.CategoryProduct{}, actualModel1, "They should not be equal")
+	assert.NotEqual(&model.CategoryProduct{}, actualModel2, "They should not be equal")
+	assert.NotEqual(&model.CategoryProduct{}, actualModel3, "They should not be equal")
+}
+
+func TestFindCategoryProductById_Empty(t *testing.T) {
+	loadEnv()
+
+	assert := assert.New(t)
+
+	categoryProductModel := model.CategoryProduct{}
+
+	expectedMessageResult1 := "CategoryProductId can't be empty"
+	expectedMessageResult2 := "CategoryProductId can't be empty"
+	expectedMessageResult3 := "CategoryProductId can't be empty"
+
+	actualMessageResult1 := ""
+	actualMessageResult2 := ""
+	actualMessageResult3 := ""
+
+	actualModel1, err1 := categoryProductModel.FindCategoryProductById("   ")
+	if err1 != nil {
+		actualMessageResult1 = fmt.Sprintf("%s", err1)
+	}
+
+	actualModel2, err2 := categoryProductModel.FindCategoryProductById("")
+	if err2 != nil {
+		actualMessageResult2 = fmt.Sprintf("%s", err2)
+	}
+
+	actualModel3, err3 := categoryProductModel.FindCategoryProductById("        ")
+	if err3 != nil {
+		actualMessageResult3 = fmt.Sprintf("%s", err3)
+	}
+
+	assert.Equal(expectedMessageResult1, actualMessageResult1, "They should be equal")
+	assert.Equal(expectedMessageResult2, actualMessageResult2, "They should be equal")
+	assert.Equal(expectedMessageResult3, actualMessageResult3, "They should be equal")
+
+	assert.Equal(&model.CategoryProduct{}, actualModel1, "They should be equal")
+	assert.Equal(&model.CategoryProduct{}, actualModel2, "They should be equal")
+	assert.Equal(&model.CategoryProduct{}, actualModel3, "They should be equal")
+}
+
+func TestFindCategoryProductById_NotFound(t *testing.T) {
+	loadEnv()
+
+	assert := assert.New(t)
+
+	categoryProductModel := model.CategoryProduct{}
+
+	categoryProductId1 := "CTG00000101"
+	categoryProductId2 := "CTG00000102"
+	categoryProductId3 := "CTG00000103"
+
+	expectedMessageResult1 := fmt.Sprintf("Can't find category product with id: %s", categoryProductId1)
+	expectedMessageResult2 := fmt.Sprintf("Can't find category product with id: %s", categoryProductId2)
+	expectedMessageResult3 := fmt.Sprintf("Can't find category product with id: %s", categoryProductId3)
+
+	actualMessageResult1 := ""
+	actualMessageResult2 := ""
+	actualMessageResult3 := ""
+
+	actualModel1, err1 := categoryProductModel.FindCategoryProductById(categoryProductId1)
+	if err1 != nil {
+		actualMessageResult1 = fmt.Sprintf("%s", err1)
+	}
+
+	actualModel2, err2 := categoryProductModel.FindCategoryProductById(categoryProductId2)
+	if err2 != nil {
+		actualMessageResult2 = fmt.Sprintf("%s", err2)
+	}
+
+	actualModel3, err3 := categoryProductModel.FindCategoryProductById(categoryProductId3)
 	if err3 != nil {
 		actualMessageResult3 = fmt.Sprintf("%s", err3)
 	}

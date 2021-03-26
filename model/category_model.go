@@ -22,18 +22,17 @@ func (c *CategoryProduct) IsCategoryProductExistsById(categoryProductId string) 
 	}
 	defer db.Close()
 
-	if categoryProductId == "" {
+	if strings.Trim(categoryProductId, " ") == "" {
 		return false, errors.New("CategoryProductId can't be empty")
 	}
 
 	check := 0
-	err = db.QueryRow("SELECT COUNT(category_product_id) FROM category_product WHERE category_product_id = ?",
-		categoryProductId).Scan(&check)
+	err = db.QueryRow("SELECT COUNT(category_product_id) FROM category_product WHERE category_product_id = ?", categoryProductId).Scan(&check)
 	if err != nil {
 		return false, errors.New("Somethings wrong!")
 	}
 
-	if check != 0 {
+	if check == 1 {
 		return true, nil
 	}
 
@@ -89,7 +88,7 @@ func (c *CategoryProduct) SaveCategoryProduct() (*CategoryProduct, error) {
 }
 
 func (c *CategoryProduct) FindCategoryProductById(categoryProductId string) (*CategoryProduct, error) {
-	isThere , err := c.IsCategoryProductExistsById(categoryProductId)
+	isThere, err := c.IsCategoryProductExistsById(categoryProductId)
 	if err != nil {
 		return &CategoryProduct{}, err
 	}
@@ -102,16 +101,19 @@ func (c *CategoryProduct) FindCategoryProductById(categoryProductId string) (*Ca
 		}
 		defer db.Close()
 
-		err = db.QueryRow("SELECT category_product_id, category, created_at, updated_at FROM category_product WHERE category_product_id = ? ",categoryProductId).
-			Scan(&c.CategoryProductId,&c.Category, &c.Audit.CreatedAt, &c.Audit.UpdatedAt)
+		err = db.QueryRow("SELECT category_product_id, category, created_at, updated_at FROM category_product WHERE category_product_id = ?",categoryProductId).Scan(&c.CategoryProductId, &c.Category, &c.Audit.CreatedAt, &c.Audit.UpdatedAt)
 
 		if err != nil {
-			fmt.Println(err)
 			return &CategoryProduct{}, errors.New("Somethings wrong!")
 		}
+
+		if c != (&CategoryProduct{}) {
+			return c, nil
+		}
+		return &CategoryProduct{}, errors.New(fmt.Sprintf("Can't find category product with id: %s", categoryProductId))
 	}
 
-	return c, nil
+	return &CategoryProduct{}, err
 }
 
 func (c *CategoryProduct) UpdateCategoryProduct() (*CategoryProduct, error) {
