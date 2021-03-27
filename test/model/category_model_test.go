@@ -290,3 +290,79 @@ func TestFindCategoryProductById_NotFound(t *testing.T) {
 	assert.Equal(&model.CategoryProduct{}, actualModel2, "They should be equal")
 	assert.Equal(&model.CategoryProduct{}, actualModel3, "They should be equal")
 }
+
+
+func TestFindCategoryProductById_Found(t *testing.T) {
+	loadEnv()
+
+	assert := assert.New(t)
+
+	categoryProductModel1 := model.CategoryProduct{}
+	categoryProductModel2 := model.CategoryProduct{}
+	categoryProductModel3 := model.CategoryProduct{}
+
+	categoryProductId1 := "CTG00000017"
+	categoryProductId2 := "CTG0000003"
+	categoryProductId3 := "CTG00000015"
+
+
+	expectedMessageResult1 := ""
+	expectedMessageResult2 := ""
+	expectedMessageResult3 := ""
+
+	actualMessageResult1 := ""
+	actualMessageResult2 := ""
+	actualMessageResult3 := ""
+
+	expectedModel1 := &model.CategoryProduct{
+		CategoryProductId: categoryProductId1,
+		Category: "Technology",
+		Audit: model.Audit{
+			CreatedAt: "2021-03-26 12:19:12",
+			UpdatedAt: nil,
+		},
+	}
+
+	updatedAt2 := "2021-03-22 13:42:01"
+	expectedModel2 := &model.CategoryProduct{
+		CategoryProductId: categoryProductId2,
+		Category: "New Category Again Again",
+		Audit: model.Audit{
+			CreatedAt: "2021-03-22 12:59:12",
+			UpdatedAt: &updatedAt2,
+		},
+	}
+
+	expectedModel3 := &model.CategoryProduct{
+		CategoryProductId: categoryProductId3,
+		Category: "Health",
+		Audit: model.Audit{
+			CreatedAt: "2021-03-26 12:15:12",
+			UpdatedAt: nil,
+		},
+	}
+
+	actualModel1, err1 := categoryProductModel1.FindCategoryProductById(categoryProductId1)
+	if err1 != nil {
+		actualMessageResult1 = fmt.Sprintf("%s", err1)
+	}
+
+
+	actualModel2, err2 := categoryProductModel2.FindCategoryProductById(categoryProductId2)
+	if err2 != nil {
+		actualMessageResult2 = fmt.Sprintf("%s", err2)
+	}
+
+	actualModel3, err3 := categoryProductModel3.FindCategoryProductById(categoryProductId3)
+	if err2 != nil {
+		actualMessageResult3 = fmt.Sprintf("%s", err3)
+	}
+
+	assert.Equal(expectedMessageResult1, actualMessageResult1, "They should be equal")
+	assert.Equal(expectedMessageResult2, actualMessageResult2, "They should be equal")
+	assert.Equal(expectedMessageResult3, actualMessageResult3, "They should be equal")
+
+	assert.Equal(expectedModel1, actualModel1, "They should be equal")
+	assert.Equal(expectedModel2, actualModel2, "They should be equal")
+	assert.Equal(expectedModel3, actualModel3, "They should be equal")
+}
