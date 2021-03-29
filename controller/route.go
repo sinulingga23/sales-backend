@@ -9,6 +9,7 @@ func RunServer() {
 
 	router.GET("/category-product/:categoryProductId", GetCategoryProductById)
 	router.POST("/category-product", CreateCategoryProduct)
+	router.PUT("/category-product/:categoryProductId", UpdateCategoryProductById)
 
 	router.Run(":8080")
 }
