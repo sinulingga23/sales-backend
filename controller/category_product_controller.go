@@ -237,3 +237,31 @@ func DeleteCategoryProductById(c *gin.Context) {
 		Message		string 	`json:"message"`
 	}{http.StatusInternalServerError, "Somethings wrong!"})
 }
+
+func GetAllCategoryProduct(c *gin.Context) {
+	categoryProductModel := model.CategoryProduct{}
+
+	listCategoryProduct, err := categoryProductModel.FindAllCategoryProduct()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, struct {
+			StatusCode	int 	`json:"statusCode"`
+			Message		string 	`json:"message"`
+		}{http.StatusInternalServerError, "Somethings wrong!"})
+		return
+	}
+
+	if len(listCategoryProduct) != 0 {
+		c.JSON(http.StatusOK, struct {
+			StatusCode	int				`json:"statusCode"`
+			Message		string				`json:"message"`
+			Data		[]*model.CategoryProduct	`json:"listCategoryProduct"`
+		}{http.StatusOK, "Success to get all category product", listCategoryProduct})
+		return
+	} else {
+		c.JSON(http.StatusNotFound, struct {
+			StatusCode	int 	`json:"statusCode"`
+			Message		string 	`json:"message"`
+		}{http.StatusNotFound, "List category product is empty"})
+		return
+	}
+}
