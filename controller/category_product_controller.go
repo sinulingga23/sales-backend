@@ -191,3 +191,49 @@ func UpdateCategoryProductById(c *gin.Context) {
 	}{http.StatusInternalServerError, "Somethings wrong!"})
 	return
 }
+
+func DeleteCategoryProductById(c *gin.Context) {
+	categoryProductId := c.Param("categoryProductId")
+
+	if strings.Trim(categoryProductId, " ") == "" {
+		c.JSON(http.StatusBadRequest, struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+		}{http.StatusBadRequest, "CategoryProduct can't be empty"})
+		return
+	}
+
+	categoryProductModel := model.CategoryProduct{}
+	isThere, err := categoryProductModel.IsCategoryProductExistsById(categoryProductId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, struct {
+			StatusCode	int 	`json:"statusCode"`
+			Message		string 	`json:"message"`
+		}{http.StatusNotFound, fmt.Sprintf("%s", err)})
+		return
+	}
+
+	if isThere {
+		isSuccess, err := categoryProductModel.DeleteCategoryProductById(categoryProductId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, struct {
+				StatusCode	int 	`json:"statusCode"`
+				Message		string 	`json:"message"`
+			}{http.StatusInternalServerError, fmt.Sprintf("%s", err)})
+			return
+		}
+
+		if isSuccess {
+			c.JSON(http.StatusOK, struct {
+				StatusCode	int 	`json:"statusCode"`
+				Message		string 	`json:"message"`
+			}{http.StatusOK, "Success to delete category product"})
+			return
+		}
+	}
+
+	c.JSON(http.StatusInternalServerError, struct {
+		StatusCode	int 	`json:"statusCode"`
+		Message		string 	`json:"message"`
+	}{http.StatusInternalServerError, "Somethings wrong!"})
+}
