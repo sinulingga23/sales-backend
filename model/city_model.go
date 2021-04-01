@@ -66,7 +66,7 @@ func (c *City) FindCityById(cityId int) (*City, error) {
 	}
 	defer db.Close()
 
-	err := db.QueryRow("SELECT city_id, province_id, city, created_at, updated_at FROM city WHERE city_id = ?", cityId).
+	err = db.QueryRow("SELECT city_id, province_id, city, created_at, updated_at FROM city WHERE city_id = ?", cityId).
 		Scan(&c.CityId, &c.ProvinceId, &c.City, &c.Audit.CreatedAt, &c.Audit.UpdatedAt)
 	if err != nil {
 		return &City{}, errors.New("Somethings wrong!")
@@ -131,32 +131,32 @@ func (c *City) DeleteCityById(cityId int) (bool, error) {
 	return true, nil
 }
 
-func (c *City) FindAllCity() (*[]City, error) {
+func (c *City) FindAllCity() ([]*City, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
-		return &[]City{}, errors.New("Somethings wrong!")
+		return []*City{}, errors.New("Somethings wrong!")
 	}
 	defer db.Close()
 
 	rows, err := db.Query("SELECT city_id, province_id, city, created_at, updated_at FROM city")
 	if err != nil {
-		return &[]City{}, errors.New("Somethings wrong!")
+		return []*City{}, errors.New("Somethings wrong!")
 	}
 	defer rows.Close()
 
-	result := &[]City{}
+	result := []*City{}
 	for rows.Next() {
 		each := &City{}
 		err = rows.Scan(&each.CityId, &each.ProvinceId, &each.City, &each.Audit.CreatedAt, &each.Audit.UpdatedAt)
 		if err != nil {
-			return &[]City{}, errors.New("Somethings wrong!")
+			return []*City{}, errors.New("Somethings wrong!")
 		}
 
 		result = append(result, each)
 	}
 
 	if err = rows.Err(); err != nil {
-		return &[]City{}, errors.New("Somethings wrong!")
+		return []*City{}, errors.New("Somethings wrong!")
 	}
 
 	return result, nil

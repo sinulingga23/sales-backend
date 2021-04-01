@@ -2,9 +2,7 @@ package main
 
 import (
 	"log"
-	"time"
 
-	"sales-backend/model"
 	"sales-backend/controller"
 	"github.com/joho/godotenv"
 )
