@@ -27,11 +27,10 @@ func (p *Province) IsProvinceExistsById(provinceId int) (bool, error) {
 		return false, errors.New("Somethings wrong!")
 	}
 
-	if check != 0 {
-		return true, nil
+	if check != 1 {
+		return false, errors.New(fmt.Sprintf("The province with id %d is not exists.", provinceId))
 	}
-
-	return false, errors.New(fmt.Sprintf("Can't find province with id: %s", provinceId))
+	return true, nil
 }
 
 func (p *Province) SaveProvince() (*Province, error) {
@@ -71,11 +70,11 @@ func (p *Province) FindProvinceById(provinceId int) (*Province, error) {
 		return &Province{}, errors.New("Somethings wrong!")
 	}
 
-	if p != (&Province{}) {
-		return p, nil
+	if p  == (&Province{}) {
+		return &Province{}, errors.New("The province can't found!")
 	}
 
-	return &Province{}, errors.New("The province can't found!")
+	return p, nil
 }
 
 
@@ -86,8 +85,7 @@ func (p *Province) UpdateProvinceById(provinceId int) (*Province, error) {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("UPDATE province SET province_id = ?, province = ?, created_at = ?, updated_at = ? WHERE province_id = ?",
-			p.ProvinceId,
+	result, err := db.Exec("UPDATE province SET province = ?, created_at = ?, updated_at = ? WHERE province_id = ?",
 			p.Province,
 			p.Audit.CreatedAt,
 			p.Audit.UpdatedAt,
@@ -149,7 +147,7 @@ func (p *Province) FindAllProvince() ([]*Province, error) {
 	for rows.Next() {
 		each := &Province{}
 
-		err = rows.Scan(&p.ProvinceId, &p.Province, &p.Audit.CreatedAt, &p.Audit.UpdatedAt)
+		err = rows.Scan(&each.ProvinceId, &each.Province, &each.Audit.CreatedAt, &each.Audit.UpdatedAt)
 		if err != nil {
 			return []*Province{}, errors.New("Somethings wrong!")
 		}
