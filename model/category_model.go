@@ -171,3 +171,33 @@ func (c *CategoryProduct) FindAllCategoryProduct() ([]*CategoryProduct, error) {
 
 	return result, nil
 }
+
+func (c *CategoryProduct) FindAllProductByCategoryProductId(categoryProductId string) ([]*Product, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return []*Product{}, errors.New("Somethings wrong!")
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT p.product_id, p.category_product_id, p.name, p.unit, p.price, p.stock, p.created_at, p.updated_at FROM product p INNER JOIN category_product cp ON p.category_product_id = cp.category_product_id HAVING p.category_product_id = ?", categoryProductId)
+	if err != nil {
+		return []*Product{}, errors.New("Somethings wrong!")
+	}
+	defer rows.Close()
+
+	result := []*Product{}
+	for rows.Next() {
+		each := &Product{}
+		err = rows.Scan(&each.ProductId, &each.CategoryProductId, &each.Name, &each.Unit, &each.Price, &each.Stock, &each.Audit.CreatedAt, &each.Audit.UpdatedAt)
+		if err != nil {
+			return []*Product{}, errors.New("Somethings wrong!")
+		}
+
+		result = append(result, each)
+	}
+
+	if err = rows.Err(); err != nil {
+		return []*Product{}, errors.New("Somethings wrong!")
+	}
+	return result, nil
+}
