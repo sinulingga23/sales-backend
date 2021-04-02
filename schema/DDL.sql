@@ -169,3 +169,10 @@ REFERENCES province(province_id)
 ON UPDATE CASCADE ON DELETE NO ACTION;
 
 UNLOCK TABLES;
+
+LOCK TABLE city WRITE, address WRITE;
+ALTER TABLE address DROP FOREIGN KEY `address_city_id_foreign`;
+ALTER TABLE sub_district DROP FOREIGN KEY `sub_district_city_id_foreign`;
+ALTER TABLE city MODIFY `city_id` INT NOT NULL AUTO_INCREMENT;
+ALTER TABLE `address` ADD CONSTRAINT `address_city_id_foreign` FOREIGN KEY(city_id) REFERENCES city(city_id) ON UPDATE CASCADE ON DELETE NO ACTION;
+ALTER TABLE `sub_district` ADD CONSTRAINT `sub_district_city_id_foreign` FOREIGN KEY(city_id) REFERENCES city(city_id) ON UPDATE CASCADE ON DELETE NO ACTION;

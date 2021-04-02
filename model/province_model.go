@@ -161,3 +161,35 @@ func (p *Province) FindAllProvince() ([]*Province, error) {
 
 	return result, nil
 }
+
+func (p *Province) FindAllCityByProvinceId(provinceId string) ([]*City, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return []*City{}, errors.New("Somethings wrong!")
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECR c.city_id, c.province_id, c.city, c.created_at, c.updated_at FROM city c INNER JOIN province p ON c.province_id = p.province_id HAVING c.province_id = ?",provinceId)
+	if err != nil {
+		return []*City{}, errors.New("Somethings wrong!")
+	}
+	defer rows.Close()
+
+	result := []*City{}
+	for rows.Next() {
+		each := &City{}
+		err := rows.Scan(&each.CityId, &each.ProvinceId, &each.City, &each.Audit.CreatedAt, &each.Audit.UpdatedAt)
+		if err != nil {
+			// TODO: continue, if there are errors
+			return []*City{}, errors.New("Somethings wrong!")
+		}
+
+		result = append(result, each)
+	}
+
+	if err = rows.Err(); err != nil {
+		return []*City{}, errors.New("Somethings wrong!")
+	}
+
+	return result, nil
+}
