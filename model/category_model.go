@@ -3,9 +3,7 @@ package model
 import (
 	"fmt"
 	"errors"
-	"time"
 	"sales-backend/utility"
-	"strings"
 )
 
 
@@ -18,13 +16,9 @@ type CategoryProduct struct {
 func (c *CategoryProduct) IsCategoryProductExistsById(categoryProductId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
-		return false, err
+		return false, errors.New("Somethings wrong!")
 	}
 	defer db.Close()
-
-	if strings.Trim(categoryProductId, " ") == "" {
-		return false, errors.New("CategoryProductId can't be empty")
-	}
 
 	check := 0
 	err = db.QueryRow("SELECT COUNT(category_product_id) FROM category_product WHERE category_product_id = ?", categoryProductId).Scan(&check)
@@ -32,27 +26,16 @@ func (c *CategoryProduct) IsCategoryProductExistsById(categoryProductId string) 
 		return false, errors.New("Somethings wrong!")
 	}
 
-	if check == 1 {
-		return true, nil
+	if check != 1 {
+		return false, errors.New(fmt.Sprintf("The category product with id %s is not exists.", categoryProductId))
 	}
-
-	return false, errors.New(fmt.Sprintf("Can't find category product with id: %s", categoryProductId))
+	return true, nil
 }
 
 func (c *CategoryProduct) SaveCategoryProduct() (*CategoryProduct, error) {
-	// Make sure the important field is not empty
-	if strings.Trim(c.Category, " ") == "" || len(c.Category) == 0 {
-		return &CategoryProduct{}, errors.New("Category name can't be empty")
-	}
-
-	// If the CreatedAt field is empty, then set the field using the current time
-	if c.Audit.CreatedAt == "" {
-		c.Audit.CreatedAt = time.Now().Format("2006-01-02 15:05:03")
-	}
-
 	db, err := utility.ConnectDB()
 	if err != nil {
-		return &CategoryProduct{}, err
+		return &CategoryProduct{}, errors.New("Somethings wrong!")
 	}
 	defer db.Close()
 
@@ -88,85 +71,72 @@ func (c *CategoryProduct) SaveCategoryProduct() (*CategoryProduct, error) {
 }
 
 func (c *CategoryProduct) FindCategoryProductById(categoryProductId string) (*CategoryProduct, error) {
-	isThere, err := c.IsCategoryProductExistsById(categoryProductId)
-	if err != nil {
-		return &CategoryProduct{}, err
-	}
-
-
-	if isThere {
-		db, err := utility.ConnectDB()
-		if err != nil {
-			return &CategoryProduct{}, err
-		}
-		defer db.Close()
-
-		err = db.QueryRow("SELECT category_product_id, category, created_at, updated_at FROM category_product WHERE category_product_id = ?",categoryProductId).Scan(&c.CategoryProductId, &c.Category, &c.Audit.CreatedAt, &c.Audit.UpdatedAt)
-
-		if err != nil {
-			return &CategoryProduct{}, errors.New("Somethings wrong!")
-		}
-
-		if c != (&CategoryProduct{}) {
-			return c, nil
-		}
-		return &CategoryProduct{}, errors.New(fmt.Sprintf("Can't find category product with id: %s", categoryProductId))
-	}
-
-	return &CategoryProduct{}, err
-}
-
-func (c *CategoryProduct) UpdateCategoryProduct() (*CategoryProduct, error) {
-	if c.CategoryProductId == "" {
-		return &CategoryProduct{}, errors.New("Id can't be empty")
-	} else if c.Category == ""{
-		return &CategoryProduct{}, errors.New("Category name can't be empty")
-	} else if c.Audit.CreatedAt == "" {
-		return &CategoryProduct{}, errors.New("CreatedAt can't be empty")
-	}
-
-	timestamp := time.Now().Format("2006-01-02 15:05:03")
-	c.Audit.UpdatedAt = &timestamp
-
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return &CategoryProduct{}, err
 	}
 	defer db.Close()
 
-	_, err = db.Exec("UPDATE category_product SET category_product_id = ?, category = ?, created_at = ?, updated_at = ? WHERE category_product_id = ?",
+	err = db.QueryRow("SELECT category_product_id, category, created_at, updated_at FROM category_product WHERE category_product_id = ?",categoryProductId).Scan(&c.CategoryProductId, &c.Category, &c.Audit.CreatedAt, &c.Audit.UpdatedAt)
+	if err != nil {
+		return &CategoryProduct{}, errors.New("Somethings wrong!")
+	}
+
+	if c == (&CategoryProduct{}) {
+		return &CategoryProduct{}, errors.New(fmt.Sprintf("Can't find category product with id: %s", categoryProductId))
+	}
+
+	return c, nil
+}
+
+func (c *CategoryProduct) UpdateCategoryProduct() (*CategoryProduct, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return &CategoryProduct{}, errors.New("Somethings wrong!")
+	}
+	defer db.Close()
+
+	result, err := db.Exec("UPDATE category_product SET category_product_id = ?, category = ?, created_at = ?, updated_at = ? WHERE category_product_id = ?",
 		c.CategoryProductId,
 		c.Category,
 		c.Audit.CreatedAt,
 		c.Audit.UpdatedAt,
 		c.CategoryProductId)
-
 	if err != nil {
-		return &CategoryProduct{}, err
+		return &CategoryProduct{}, errors.New("Somethings wrong!")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return &CategoryProduct{}, errors.New("Somethings wrong!")
+	}
+
+	if rowsAffected != 1 {
+		return &CategoryProduct{}, errors.New("Somethings wrong!")
 	}
 
 	return c, nil
 }
 
 func (c *CategoryProduct) DeleteCategoryProductById(categoryProductId string) (bool, error) {
-	isThere, err := c.IsCategoryProductExistsById(categoryProductId)
+	db, err := utility.ConnectDB()
 	if err != nil {
-		return false, err
+		return false, errors.New("Somethings wrong!")
+	}
+	defer db.Close()
+
+	result, err := db.Exec("DELETE FROM category_product WHERE category_product_id = ?", categoryProductId)
+	if err != nil {
+		return false, errors.New("Somethings wrong!")
 	}
 
-	if isThere {
-		db, err := utility.ConnectDB()
-		if err != nil {
-			return false, err
-		}
-		defer db.Close()
-
-		_, err = db.Exec("DELETE FROM category_product WHERE category_product_id = ?", categoryProductId)
-		if err != nil {
-			return false, errors.New("Somethings wrong!")
-		}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return false, errors.New("Somethings wrong!")
 	}
-
+	if rowsAffected != 1 {
+		return false, errors.New("Somethings wrong!")
+	}
 	return true, nil
 }
 
