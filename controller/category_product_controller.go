@@ -65,10 +65,10 @@ func CreateCategoryProduct(c *gin.Context) {
 	requestCategoryProduct := model.CategoryProduct{}
 
 	if err := c.Bind(&requestCategoryProduct); err != nil {
-		c.JSON(http.StatusInternalServerError, struct {
+		c.JSON(http.StatusBadRequest, struct {
 			StatusCode	int	`json:"statusCode"`
 			Message		string	`json:"message"`
-		}{http.StatusInternalServerError, "Somethings wrong!"})
+		}{http.StatusBadRequest, "Invalid request"})
 		return
 	}
 
@@ -110,10 +110,10 @@ func UpdateCategoryProductById(c *gin.Context) {
 	requestCategoryProduct := model.CategoryProduct{}
 
 	if err := c.Bind(&requestCategoryProduct); err != nil {
-		c.JSON(http.StatusInternalServerError, struct {
+		c.JSON(http.StatusBadRequest, struct {
 			StatusCode	int	`json:"statusCode"`
 			Message		string	`json:"message"`
-		}{http.StatusInternalServerError, "Somethings wrong!"})
+		}{http.StatusBadRequest, "Somethings wrong!"})
 		return
 	}
 
