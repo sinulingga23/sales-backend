@@ -12,6 +12,7 @@ func RunServer() {
 	router.PUT("/category-products/:categoryProductId", UpdateCategoryProductById)
 	router.DELETE("/category-products/:categoryProductId", DeleteCategoryProductById)
 	router.GET("/category-products", GetAllCategoryProduct)
+	router.GET("/category-products/:categoryProductId/products", GetAllProductByCategoryProductId)
 
 	router.Run(":8080")
 }

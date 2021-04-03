@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"log"
 	"errors"
 	"sales-backend/utility"
 )
@@ -181,6 +182,7 @@ func (c *CategoryProduct) FindAllProductByCategoryProductId(categoryProductId st
 
 	rows, err := db.Query("SELECT p.product_id, p.category_product_id, p.name, p.unit, p.price, p.stock, p.created_at, p.updated_at FROM product p INNER JOIN category_product cp ON p.category_product_id = cp.category_product_id HAVING p.category_product_id = ?", categoryProductId)
 	if err != nil {
+		log.Printf("query: %v", err)
 		return []*Product{}, errors.New("Somethings wrong!")
 	}
 	defer rows.Close()
@@ -190,6 +192,7 @@ func (c *CategoryProduct) FindAllProductByCategoryProductId(categoryProductId st
 		each := &Product{}
 		err = rows.Scan(&each.ProductId, &each.CategoryProductId, &each.Name, &each.Unit, &each.Price, &each.Stock, &each.Audit.CreatedAt, &each.Audit.UpdatedAt)
 		if err != nil {
+			log.Printf("parsing: %v", err)
 			return []*Product{}, errors.New("Somethings wrong!")
 		}
 

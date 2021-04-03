@@ -265,3 +265,51 @@ func GetAllCategoryProduct(c *gin.Context) {
 		return
 	}
 }
+
+func GetAllProductByCategoryProductId(c *gin.Context) {
+	categoryProductId := c.Param("categoryProductId")
+
+	if strings.Trim(categoryProductId, " ") == "" {
+		c.JSON(http.StatusBadRequest, struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+		}{http.StatusBadRequest, "CategoryProduct can't be empty"})
+		return
+	}
+
+	categoryProductModel := model.CategoryProduct{}
+
+	_, err := categoryProductModel.IsCategoryProductExistsById(categoryProductId)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, struct {
+			StatusCode	int 	`json:"statusCode"`
+			Message		string	`json:"message"`
+		}{http.StatusBadRequest, "Invalid request"})
+		return
+	}
+
+	listCity, err := categoryProductModel.FindAllProductByCategoryProductId(categoryProductId)
+	if err != nil {
+		log.Printf("cpc: %v", err)
+		c.JSON(http.StatusBadRequest, struct {
+			StatusCode	int 	`json:"statusCode"`
+			Message		string	`json:"message"`
+		}{http.StatusBadRequest, "Somethings wrong!"})
+		return
+	}
+
+	if len(listCity) != 0 {
+		c.JSON(http.StatusOK, struct {
+			StatusCode	int			`json:"statusCode"`
+			Message		string 			`json:"message"`
+			Data		[]*model.Product	`json:"listProduct"`
+		}{http.StatusOK, "Success to get list", listCity})
+		return
+	} else {
+		c.JSON(http.StatusNotFound, struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+		}{http.StatusNotFound,"Can't found the related list"})
+		return
+	}
+}
