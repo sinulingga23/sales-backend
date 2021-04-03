@@ -8,19 +8,9 @@ import (
 
 	"sales-backend/model"
 	"github.com/stretchr/testify/assert"
-	"github.com/joho/godotenv"
 )
 
-func loadEnv() {
-	load := godotenv.Load()
-	if load != nil {
-		log.Fatal("Error loading .env file")
-	}
-}
-
 func TestIsCategoryProductExistsById_Exists(t *testing.T) {
-	loadEnv()
-
 	assert := assert.New(t)
 
 	categoryProductModel := model.CategoryProduct{}
@@ -50,8 +40,6 @@ func TestIsCategoryProductExistsById_Exists(t *testing.T) {
 }
 
 func TestIsCategoryProductExistsByIdById_NotExists(t *testing.T) {
-	loadEnv()
-
 	assert := assert.New(t)
 
 	categoryProductModel := model.CategoryProduct{}
@@ -94,8 +82,6 @@ func TestIsCategoryProductExistsByIdById_NotExists(t *testing.T) {
 }
 
 func TestIsCategoryProductExistsById_InputEmpty(t *testing.T) {
-	loadEnv()
-
 	assert := assert.New(t)
 
 	categoryProductModel := model.CategoryProduct{}
@@ -137,8 +123,6 @@ func TestIsCategoryProductExistsById_InputEmpty(t *testing.T) {
 }
 
 func TestSaveCategoryProduct_Empty(t *testing.T) {
-	loadEnv()
-
 	assert := assert.New(t)
 
 	expectedMessageResult1 := "Category name can't be empty"
@@ -179,8 +163,6 @@ func TestSaveCategoryProduct_Empty(t *testing.T) {
 }
 
 func TestSaveCategoryProduct_Success(t *testing.T) {
-	loadEnv()
-
 	assert := assert.New(t)
 
 	saveModel1 := model.CategoryProduct{}
@@ -210,8 +192,6 @@ func TestSaveCategoryProduct_Success(t *testing.T) {
 }
 
 func TestFindCategoryProductById_Empty(t *testing.T) {
-	loadEnv()
-
 	assert := assert.New(t)
 
 	categoryProductModel := model.CategoryProduct{}
@@ -249,8 +229,6 @@ func TestFindCategoryProductById_Empty(t *testing.T) {
 }
 
 func TestFindCategoryProductById_NotFound(t *testing.T) {
-	loadEnv()
-
 	assert := assert.New(t)
 
 	categoryProductModel := model.CategoryProduct{}
@@ -293,8 +271,6 @@ func TestFindCategoryProductById_NotFound(t *testing.T) {
 
 
 func TestFindCategoryProductById_Found(t *testing.T) {
-	loadEnv()
-
 	assert := assert.New(t)
 
 	categoryProductModel1 := model.CategoryProduct{}
