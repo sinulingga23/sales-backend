@@ -3,7 +3,6 @@ package model
 import (
 	"fmt"
 	"errors"
-	"time"
 
 	"sales-backend/utility"
 )
@@ -15,42 +14,26 @@ type Province struct {
 }
 
 
-func (p *Province) IsProvinceExists(provinceId string) (bool, error) {
+func (p *Province) IsProvinceExistsById(provinceId int) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, err
 	}
 	defer db.Close()
 
-	// Make sure the important fields is not empty
-	if provinceId == "" {
-		return false, errors.New("ProvinceId can't be empty")
-	}
-
 	check := 0
 	err = db.QueryRow("SELECT COUNT(province_id) FROM province WHERE province_id = ?", provinceId).Scan(&check)
 	if err != nil {
-		return false, errors.New("Somethings wrong!")
+		return false, err
 	}
 
-	if check != 0 {
-		return true, nil
+	if check != 1 {
+		return false, errors.New(fmt.Sprintf("The province with id %d is not exists.", provinceId))
 	}
-
-	return false, errors.New(fmt.Sprintf("Can't find province with id: %s", provinceId))
+	return true, nil
 }
 
 func (p *Province) SaveProvince() (*Province, error) {
-	// Make sure the important fields is not empty
-	if p.Province == "" {
-		return &Province{}, errors.New("Province name can't be empty")
-	}
-
-	// If the CreatedAt field is empty, then set the field using the current time
-	if p.Audit.CreatedAt == "" {
-		p.Audit.CreatedAt = time.Now().Format("2006-01-02 15:05:03")
-	}
-
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return &Province{}, err
@@ -61,27 +44,152 @@ func (p *Province) SaveProvince() (*Province, error) {
 		p.Province,
 		p.Audit.CreatedAt)
 
-	if err != nil  || result != nil {
-		return &Province{}, errors.New("Somethings wrong!")
+	if err != nil {
+		return &Province{}, err
 	}
 
 	currentId, err := result.LastInsertId()
 	if err != nil {
-		return &Province{}, errors.New("Somethings wrong!")
+		return &Province{}, err
 	}
 
 	p.ProvinceId = int(currentId)
+	return p, nil
+}
+
+func (p *Province) FindProvinceById(provinceId int) (*Province, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return &Province{}, err
+	}
+	defer db.Close()
+
+	err = db.QueryRow("SELECT province_id, province, created_at, updated_at FROM province WHERE province_id = ?", provinceId).
+		Scan(&p.ProvinceId, &p.Province, &p.Audit.CreatedAt, &p.Audit.UpdatedAt)
+	if err != nil {
+		return &Province{}, err
+	}
+
+	if p  == (&Province{}) {
+		return &Province{}, errors.New("The province can't found!")
+	}
 
 	return p, nil
 }
 
 
-// func (p *Province) SaveProvince(*Province, errors) {
-// 	db, err := utility.ConnectDB()
-// 	if err != nil {
-// 		return false, err
-// 	}
-// 	defer db.Close()
+func (p *Province) UpdateProvinceById(provinceId int) (*Province, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return &Province{}, err
+	}
+	defer db.Close()
 
-// 	if
-// }
+	result, err := db.Exec("UPDATE province SET province = ?, created_at = ?, updated_at = ? WHERE province_id = ?",
+			p.Province,
+			p.Audit.CreatedAt,
+			p.Audit.UpdatedAt,
+			provinceId)
+	if err != nil {
+		return &Province{},err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return &Province{}, err
+	}
+
+	if rowsAffected != 1 {
+		return &Province{}, errors.New("Somethings wrong!")
+	}
+
+	return p, nil
+}
+
+func (p *Province) DeleteProvinceById(provinceId int) (bool, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return false, err
+	}
+	defer db.Close()
+
+	result, err := db.Exec("DELETE province WHERE province_id = ?", provinceId)
+	if err != nil {
+		return false, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return false, err
+	}
+
+	if rowsAffected != 1 {
+		return false, errors.New("Somethings wrong!")
+	}
+
+	return true, nil
+}
+
+func (p *Province) FindAllProvince() ([]*Province, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return []*Province{}, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT province_id, province, created_at, updated_at FROM province")
+	if err != nil {
+		return []*Province{}, errors.New("Somethings wrong!")
+	}
+	defer rows.Close()
+
+	result := []*Province{}
+	for rows.Next() {
+		each := &Province{}
+
+		err = rows.Scan(&each.ProvinceId, &each.Province, &each.Audit.CreatedAt, &each.Audit.UpdatedAt)
+		if err != nil {
+			return []*Province{}, errors.New("Somethings wrong!")
+		}
+
+		result = append(result, each)
+	}
+
+	if err = rows.Err(); err != nil {
+		return []*Province{}, errors.New("Somethings wrong!")
+	}
+
+	return result, nil
+}
+
+func (p *Province) FindAllCityByProvinceId(provinceId string) ([]*City, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return []*City{}, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECR c.city_id, c.province_id, c.city, c.created_at, c.updated_at FROM city c INNER JOIN province p ON c.province_id = p.province_id HAVING c.province_id = ?",provinceId)
+	if err != nil {
+		return []*City{}, err
+	}
+	defer rows.Close()
+
+	result := []*City{}
+	for rows.Next() {
+		each := &City{}
+		err := rows.Scan(&each.CityId, &each.ProvinceId, &each.City, &each.Audit.CreatedAt, &each.Audit.UpdatedAt)
+		if err != nil {
+			// TODO: continue, if there are errors
+			return []*City{}, err
+		}
+
+		result = append(result, each)
+	}
+
+	if err = rows.Err(); err != nil {
+		return []*City{}, err
+	}
+
+	return result, nil
+}

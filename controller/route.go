@@ -7,11 +7,16 @@ import (
 func RunServer() {
 	router := gin.Default()
 
-	router.GET("/category-product/:categoryProductId", GetCategoryProductById)
-	router.POST("/category-product", CreateCategoryProduct)
-	router.PUT("/category-product/:categoryProductId", UpdateCategoryProductById)
-	router.DELETE("/category-product/:categoryProductId", DeleteCategoryProductById)
-	router.GET("/category-product", GetAllCategoryProduct)
+	// category-products
+	router.GET("/category-products/:categoryProductId", GetCategoryProductById)
+	router.POST("/category-products", CreateCategoryProduct)
+	router.PUT("/category-products/:categoryProductId", UpdateCategoryProductById)
+	router.DELETE("/category-products/:categoryProductId", DeleteCategoryProductById)
+	router.GET("/category-products", GetAllCategoryProduct)
+	router.GET("/category-products/:categoryProductId/products", GetAllProductByCategoryProductId)
+
+	// provinces
+	router.GET("/provinces/:provinceId", GetProvinceById)
 
 	router.Run(":8080")
 }
