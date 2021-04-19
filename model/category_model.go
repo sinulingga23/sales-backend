@@ -1,17 +1,16 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"log"
-	"errors"
 	"sales-backend/utility"
 )
 
-
 type CategoryProduct struct {
-	CategoryProductId	string `json:"categoryProductId"`
-	Category          	string `json:"category"`
-	Audit             	Audit  `json:"audit"`
+	CategoryProductId string `json:"categoryProductId"`
+	Category          string `json:"category"`
+	Audit             Audit  `json:"audit"`
 }
 
 func (c *CategoryProduct) IsCategoryProductExistsById(categoryProductId string) (bool, error) {
@@ -51,13 +50,12 @@ func (c *CategoryProduct) SaveCategoryProduct() (*CategoryProduct, error) {
 	count := utility.DigitsCount(number)
 	formatCategoryProductId := "CTG00000000"
 	categoryProductId := "CTG"
-	for i := 0; i<len(formatCategoryProductId)-count-5; i++ {
+	for i := 0; i < len(formatCategoryProductId)-count-5; i++ {
 		categoryProductId += "0"
 	}
 	number += 1
 	categoryProductId += fmt.Sprintf("%d", number)
 	c.CategoryProductId = categoryProductId
-
 
 	// Query add category
 	_, err = db.Exec("INSERT INTO category_product (category_product_id, category, created_at) VALUES (?, ?, ?)",
@@ -78,7 +76,7 @@ func (c *CategoryProduct) FindCategoryProductById(categoryProductId string) (*Ca
 	}
 	defer db.Close()
 
-	err = db.QueryRow("SELECT category_product_id, category, created_at, updated_at FROM category_product WHERE category_product_id = ?",categoryProductId).Scan(&c.CategoryProductId, &c.Category, &c.Audit.CreatedAt, &c.Audit.UpdatedAt)
+	err = db.QueryRow("SELECT category_product_id, category, created_at, updated_at FROM category_product WHERE category_product_id = ?", categoryProductId).Scan(&c.CategoryProductId, &c.Category, &c.Audit.CreatedAt, &c.Audit.UpdatedAt)
 	if err != nil {
 		return &CategoryProduct{}, errors.New("Somethings wrong!")
 	}
@@ -166,7 +164,7 @@ func (c *CategoryProduct) FindAllCategoryProduct() ([]*CategoryProduct, error) {
 		result = append(result, each)
 	}
 
-	if err = rows.Err(); err != nil  {
+	if err = rows.Err(); err != nil {
 		return []*CategoryProduct{}, err
 	}
 

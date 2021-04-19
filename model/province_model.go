@@ -24,7 +24,7 @@ func (p *Province) IsProvinceExistsById(provinceId int) (bool, error) {
 	check := 0
 	err = db.QueryRow("SELECT COUNT(province_id) FROM province WHERE province_id = ?", provinceId).Scan(&check)
 	if err != nil {
-		return false, errors.New("Somethings wrong!")
+		return false, err
 	}
 
 	if check != 1 {
@@ -44,13 +44,13 @@ func (p *Province) SaveProvince() (*Province, error) {
 		p.Province,
 		p.Audit.CreatedAt)
 
-	if err != nil  || result != nil {
-		return &Province{}, errors.New("Somethings wrong!")
+	if err != nil {
+		return &Province{}, err
 	}
 
 	currentId, err := result.LastInsertId()
 	if err != nil {
-		return &Province{}, errors.New("Somethings wrong!")
+		return &Province{}, err
 	}
 
 	p.ProvinceId = int(currentId)
@@ -60,14 +60,14 @@ func (p *Province) SaveProvince() (*Province, error) {
 func (p *Province) FindProvinceById(provinceId int) (*Province, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
-		return &Province{}, errors.New("Somethings wrong!")
+		return &Province{}, err
 	}
 	defer db.Close()
 
 	err = db.QueryRow("SELECT province_id, province, created_at, updated_at FROM province WHERE province_id = ?", provinceId).
 		Scan(&p.ProvinceId, &p.Province, &p.Audit.CreatedAt, &p.Audit.UpdatedAt)
 	if err != nil {
-		return &Province{}, errors.New("Somethings wrong!")
+		return &Province{}, err
 	}
 
 	if p  == (&Province{}) {
@@ -80,8 +80,8 @@ func (p *Province) FindProvinceById(provinceId int) (*Province, error) {
 
 func (p *Province) UpdateProvinceById(provinceId int) (*Province, error) {
 	db, err := utility.ConnectDB()
-	if err != nil || p.ProvinceId != provinceId {
-		return &Province{}, errors.New("Somethings wrong!")
+	if err != nil {
+		return &Province{}, err
 	}
 	defer db.Close()
 
@@ -91,12 +91,12 @@ func (p *Province) UpdateProvinceById(provinceId int) (*Province, error) {
 			p.Audit.UpdatedAt,
 			provinceId)
 	if err != nil {
-		return &Province{}, errors.New("Somethings wrong!")
+		return &Province{},err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return &Province{}, errors.New("Somethings wrong!")
+		return &Province{}, err
 	}
 
 	if rowsAffected != 1 {
@@ -109,18 +109,18 @@ func (p *Province) UpdateProvinceById(provinceId int) (*Province, error) {
 func (p *Province) DeleteProvinceById(provinceId int) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
-		return false, errors.New("Somethings wrong!")
+		return false, err
 	}
 	defer db.Close()
 
 	result, err := db.Exec("DELETE province WHERE province_id = ?", provinceId)
 	if err != nil {
-		return false, errors.New("Somethings wrong!")
+		return false, err
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return false, errors.New("Somethings wrong!")
+		return false, err
 	}
 
 	if rowsAffected != 1 {
@@ -133,7 +133,7 @@ func (p *Province) DeleteProvinceById(provinceId int) (bool, error) {
 func (p *Province) FindAllProvince() ([]*Province, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
-		return []*Province{}, errors.New("Somethings wrong!")
+		return []*Province{}, err
 	}
 	defer db.Close()
 
@@ -165,13 +165,13 @@ func (p *Province) FindAllProvince() ([]*Province, error) {
 func (p *Province) FindAllCityByProvinceId(provinceId string) ([]*City, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
-		return []*City{}, errors.New("Somethings wrong!")
+		return []*City{}, err
 	}
 	defer db.Close()
 
 	rows, err := db.Query("SELECR c.city_id, c.province_id, c.city, c.created_at, c.updated_at FROM city c INNER JOIN province p ON c.province_id = p.province_id HAVING c.province_id = ?",provinceId)
 	if err != nil {
-		return []*City{}, errors.New("Somethings wrong!")
+		return []*City{}, err
 	}
 	defer rows.Close()
 
@@ -181,14 +181,14 @@ func (p *Province) FindAllCityByProvinceId(provinceId string) ([]*City, error) {
 		err := rows.Scan(&each.CityId, &each.ProvinceId, &each.City, &each.Audit.CreatedAt, &each.Audit.UpdatedAt)
 		if err != nil {
 			// TODO: continue, if there are errors
-			return []*City{}, errors.New("Somethings wrong!")
+			return []*City{}, err
 		}
 
 		result = append(result, each)
 	}
 
 	if err = rows.Err(); err != nil {
-		return []*City{}, errors.New("Somethings wrong!")
+		return []*City{}, err
 	}
 
 	return result, nil
