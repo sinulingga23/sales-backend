@@ -2,6 +2,8 @@ package controller
 
 import (
 	"fmt"
+	"time"
+	"strings"
 	"strconv"
 	"net/http"
 
@@ -61,3 +63,50 @@ func GetProvinceById(c *gin.Context) {
 	return
 }
 
+func CreateProvince(c *gin.Context) {
+	requestProvince := model.Province{}
+
+	err := c.Bind(&requestProvince)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, struct {
+			StatusCode	int	`json:"statusCode"`
+			Message   	string	`json:"message"`
+			Errors 		string 	`json:"errors"`
+		}{http.StatusBadRequest, "Invalid request", "Bad Request"})
+		return
+	}
+
+	if strings.Trim(requestProvince.Province, " ") == "" {
+		c.JSON(http.StatusBadRequest, struct {
+			StatusCode	int	`json:"statusCode"`
+			Message   	string	`json:"message"`
+		}{http.StatusBadRequest, "Province name can't be empty"})
+		return
+	} else {
+		requestProvince.Audit.CreatedAt = time.Now().Format("2006-01-02 15:05:03")
+		createdProvince, err := requestProvince.SaveProvince()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, struct {
+				StatusCode	int	`json:"statusCode"`
+				Message		string	`json:"message"`
+				Errors 		string 	`json:"errors"`
+			}{http.StatusInternalServerError, "Somethings wrong!", fmt.Sprintf("%v", err)})
+			return
+		}
+
+		if createdProvince != (&model.Province{}) {
+			c.JSON(http.StatusOK, struct {
+				StatusCode	int		`json:"statusCode"`
+				Message 	string		`json:"message"`
+				Data 		model.Province	`json:"province"`
+			}{http.StatusOK, "Success to create province.", *createdProvince})
+			return
+		}
+	}
+
+	c.JSON(http.StatusInternalServerError, struct {
+		StatusCode	int 	`json:"statusCode"`
+		Message 	string 	`json:"message"`
+	}{http.StatusInternalServerError, "Somethings wrong!"})
+	return
+}
