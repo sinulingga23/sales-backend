@@ -7,5 +7,5 @@ func DigitsCount(number int) int {
 		number /= 10
 		count += 1
 	}
-	return 0;
+	return count
 }
