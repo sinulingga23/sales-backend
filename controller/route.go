@@ -17,6 +17,7 @@ func RunServer() {
 
 	// provinces
 	router.GET("/provinces/:provinceId", GetProvinceById)
+	router.POST("/provinces", CreateProvince)
 
 	router.Run(":8080")
 }
