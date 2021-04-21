@@ -113,7 +113,7 @@ func (p *Province) DeleteProvinceById(provinceId int) (bool, error) {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("DELETE province WHERE province_id = ?", provinceId)
+	result, err := db.Exec("DELETE FROM province WHERE province_id = ?", provinceId)
 	if err != nil {
 		return false, err
 	}
