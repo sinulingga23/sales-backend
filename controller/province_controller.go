@@ -2,6 +2,7 @@ package controller
 
 import (
 	"fmt"
+	"log"
 	"time"
 	"strings"
 	"strconv"
@@ -106,6 +107,107 @@ func CreateProvince(c *gin.Context) {
 
 	c.JSON(http.StatusInternalServerError, struct {
 		StatusCode	int 	`json:"statusCode"`
+		Message 	string 	`json:"message"`
+	}{http.StatusInternalServerError, "Somethings wrong!"})
+	return
+}
+
+func UpdateProvinceById(c *gin.Context) {
+	provinceId := 0
+	requestProvince := model.Province{}
+
+	err := c.Bind(&requestProvince);
+	if err != nil {
+		c.JSON(http.StatusBadRequest, struct {
+			StatusCode	int	`json:"statusCode"`
+			Message    	string	`json:"message"`
+		}{http.StatusBadRequest, "Somethings wrong!"})
+		return
+	}
+
+	provinceId, err = strconv.Atoi(c.Param("provinceId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, struct {
+			StatusCode	int 	`json:"statusCode"`
+			Message 	string 	`json:"message"`
+			Errors		string 	`json:"errors"`
+		}{http.StatusBadRequest, "Invalid Request", "Bad Request"})
+		return
+	}
+
+	if provinceId != requestProvince.ProvinceId {
+		c.JSON(http.StatusBadRequest, struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+		}{http.StatusBadRequest, "Invalid format!"})
+		return
+	}
+
+	if provinceId == 0 || requestProvince.ProvinceId == 0 {
+		c.JSON(http.StatusBadRequest, struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+		}{http.StatusBadRequest, "ProvinceId can't be zero"})
+		return
+	}
+
+	if requestProvince.Province == "" {
+		c.JSON(http.StatusBadRequest, struct {
+			StatusCode	int	`json:"statusCode"`
+			Message		string	`json:"message"`
+		}{http.StatusBadRequest, "Province can't be empty"})
+		return
+	}
+
+	provinceModel := model.Province{}
+	isThere, err := provinceModel.IsProvinceExistsById(provinceId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, struct {
+			StatusCode	int 	`json:"statusCode"`
+			Message		string 	`json:"message"`
+			Errors		string	`json:"errors"`
+		}{http.StatusNotFound, fmt.Sprintf("%s", err), "Not Found"})
+		return
+	}
+
+	if isThere {
+		currentProvince, err := provinceModel.FindProvinceById(provinceId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, struct {
+				StatusCode	int	`json:"statusCode"`
+				Message		string	`json:"message"`
+			}{http.StatusInternalServerError, fmt.Sprintf("%s", err)})
+			return
+		}
+
+		currentProvince.ProvinceId = requestProvince.ProvinceId
+		currentProvince.Province = requestProvince.Province
+		currentProvince.Audit.CreatedAt = requestProvince.Audit.CreatedAt
+		timestamp := time.Now().Format("2006-01-02 15:05:03")
+		currentProvince.Audit.UpdatedAt = &timestamp
+
+		updatedProvince, err := currentProvince.UpdateProvinceById(provinceId)
+		if err != nil {
+			log.Printf("%v", err)
+			c.JSON(http.StatusInternalServerError, struct {
+				StatusCode	int	`json:"statusCode"`
+				Message		string	`json:"message"`
+			}{http.StatusInternalServerError, "Somethings wrong!"})
+			return
+		}
+
+		if updatedProvince != (&model.Province{}) {
+			c.JSON(http.StatusOK, struct {
+				StatusCode	int		`json:"statusCode"`
+				Message		string		`json:"message"`
+				Data		model.Province	`json:"categoryProduct"`
+			}{http.StatusOK, "Success to update the province", *updatedProvince})
+			return
+		}
+	}
+
+	c.JSON(http.StatusInternalServerError, struct {
+		StatusCode	int	`json:"statusCode"`
 		Message 	string 	`json:"message"`
 	}{http.StatusInternalServerError, "Somethings wrong!"})
 	return
