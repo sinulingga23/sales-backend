@@ -154,7 +154,7 @@ func UpdateProvinceById(c *gin.Context) {
 	if requestProvince.Province == "" {
 		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
 			StatusCode:	http.StatusBadRequest,
-			Message:	"Province can't be empty"
+			Message:	"Province can't be empty",
 		})
 		return
 	}
@@ -198,9 +198,10 @@ func UpdateProvinceById(c *gin.Context) {
 
 		if updatedProvince != (&model.Province{}) {
 			c.JSON(http.StatusOK, response.ResponseProvince {
-				StatusCode:	http.StatusOK
+				StatusCode:	http.StatusOK,
 				Message:	"Success to update the province",
-				Province:	*updatedProvince,})
+				Province:	*updatedProvince,
+			})
 			return
 		}
 	}
@@ -241,7 +242,7 @@ func DeleteProvinceById(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
 				StatusCode:	http.StatusInternalServerError,
 				Message:	"Somethings wrong!",
-				Errors:		fmt.Sprintf("%s", err)
+				Errors:		fmt.Sprintf("%s", err),
 			})
 			return
 		}
