@@ -282,10 +282,12 @@ func GetProvinces(c *gin.Context) {
 			Message:	"Success to get the provinces",
 			Provinces:	provinces,
 		})
+		return
 	} else {
 		c.JSON(http.StatusNotFound, response.ResponseGeneric {
 			StatusCode:	http.StatusNotFound,
 			Message:	"The provinces is empty",
 		})
+		return
 	}
 }
