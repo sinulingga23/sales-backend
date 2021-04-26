@@ -20,6 +20,7 @@ func RunServer() {
 	router.POST("/provinces", CreateProvince)
 	router.PUT("/provinces/:provinceId", UpdateProvinceById)
 	router.DELETE("/provinces/:provinceId", DeleteProvinceById)
+	router.GET("/provinces",GetProvinces)
 
 	router.Run(":8080")
 }
