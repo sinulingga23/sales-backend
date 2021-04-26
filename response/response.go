@@ -38,3 +38,15 @@ type ResponseCategories struct {
 	Message 		string				`json:"message"`
 	CategoryProducts 	[]*model.CategoryProduct	`json:"categoryProducts"`
 }
+
+type ResponseCity struct {
+	StatusCode	int 		`json:"statusCode"`
+	Message		string		`json:"message"`
+	City		model.City	`json:"city"`
+}
+
+type ResponseCities struct {
+	StatusCode	int		`json:"statusCode"`
+	Message		string 		`json:"message"`
+	Cities		[]*model.City	`json:"cities"`
+}
