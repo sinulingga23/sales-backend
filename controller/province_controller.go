@@ -291,3 +291,68 @@ func GetProvinces(c *gin.Context) {
 		return
 	}
 }
+
+func GetCitiesByProvinceId(c *gin.Context) {
+	provinceId := 0
+
+	provinceId, err := strconv.Atoi(c.Param("provinceId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"Invalid Request",
+			Errors:		fmt.Sprintf("%s", err),
+		})
+		return
+	}
+
+	provinceModel := model.Province{}
+	isThere, err := provinceModel.IsProvinceExistsById(provinceId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, response.ResponseErrors {
+			StatusCode:	http.StatusNotFound,
+			Message:	"Not Found",
+			Errors:		fmt.Sprintf("%s", err),
+		})
+		return
+	}
+
+	if isThere {
+		cities, err := provinceModel.FindAllCityByProvinceId(provinceId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+				StatusCode:	http.StatusInternalServerError,
+				Message: 	"Somethings wrong!",
+				Errors: 	fmt.Sprintf("%s", err),
+			})
+			return
+		}
+
+		if len(cities) != 0 {
+			c.JSON(http.StatusOK, response.ResponseCities {
+				StatusCode:	http.StatusOK,
+				Message:	"Success to get the cities by provinceId",
+				Cities:		cities,
+			})
+			return
+		} else {
+			c.JSON(http.StatusNotFound, response.ResponseGeneric {
+				StatusCode:	http.StatusNotFound,
+				Message:	"Can't found the cities by provinceId",
+			})
+			return
+		}
+	} else {
+		c.JSON(http.StatusNotFound, response.ResponseErrors {
+			StatusCode:	http.StatusNotFound,
+			Message:	"Not Found",
+			Errors:		fmt.Sprintf("%s", err),
+		})
+		return
+	}
+
+	c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+		StatusCode:	http.StatusInternalServerError,
+		Message:	"Somethings wrong!",
+	})
+	return
+}
