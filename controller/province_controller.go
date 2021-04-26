@@ -262,3 +262,30 @@ func DeleteProvinceById(c *gin.Context) {
 	})
 	return
 }
+
+func GetProvinces(c *gin.Context) {
+	provinceModel := model.Province{}
+
+	provinces, err := provinceModel.FindAllProvince()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message: 	"Somethings wrong!",
+			Errors: 	fmt.Sprintf("%s", err),
+		})
+		return
+	}
+
+	if len(provinces) != 0 {
+		c.JSON(http.StatusOK, response.ResponseProvinces {
+			StatusCode:	http.StatusOK,
+			Message:	"Success to get the provinces",
+			Provinces:	provinces,
+		})
+	} else {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The provinces is empty",
+		})
+	}
+}
