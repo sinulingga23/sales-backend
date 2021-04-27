@@ -27,13 +27,13 @@ type ResponseProvinces struct {
 	Provinces 	[]*model.Province	`json:"provinces"`
 }
 
-type ResponseCategory struct {
+type ResponseCategoryProduct struct {
 	StatusCode 		int 			`json:"statusCode"`
 	Message			string 			`json:"message"`
 	CategoryProduct 	model.CategoryProduct	`json:"categoryProduct"`
 }
 
-type ResponseCategories struct {
+type ResponseCategoryProducts struct {
 	StatusCode 		int 				`json:"statusCode"`
 	Message 		string				`json:"message"`
 	CategoryProducts 	[]*model.CategoryProduct	`json:"categoryProducts"`
@@ -49,4 +49,10 @@ type ResponseCities struct {
 	StatusCode	int		`json:"statusCode"`
 	Message		string 		`json:"message"`
 	Cities		[]*model.City	`json:"cities"`
+}
+
+type ResponseProducts struct {
+	StatusCode	int			`json:"statusCode"`
+	Message		string			`json:"message"`
+	Products	[]*model.Product	`json:"products"`
 }
