@@ -7,55 +7,56 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"sales-backend/model"
+	"sales-backend/response"
+	"github.com/gin-gonic/gin"
 )
 
 func GetCategoryProductById(c *gin.Context) {
 	categoryProductId := c.Param("categoryProductId")
 
 	if strings.Trim(categoryProductId, " ") == "" {
-		c.JSON(http.StatusBadRequest, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusBadRequest, "CategoryProductId can't be empty"})
+		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"CategoryProductId can't be empty",
+		})
 		return
 	}
 
 	categoryProductModel := model.CategoryProduct{}
 	isThere, err := categoryProductModel.IsCategoryProductExistsById(categoryProductId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusNotFound, fmt.Sprintf("%s", err)})
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	fmt.Sprintf("%s", err),
+		})
 		return
 	}
 
 	if isThere {
 		currentModel, err := categoryProductModel.FindCategoryProductById(categoryProductId)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, struct {
-				StatusCode int    `json:"statusCode"`
-				Message    string `json:"message"`
-			}{http.StatusInternalServerError, fmt.Sprintf("%s", err)})
+			c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+				StatusCode:	http.StatusInternalServerError,
+				Message:	fmt.Sprintf("%s", err),
+			})
 			return
 		}
 
 		if currentModel != (&model.CategoryProduct{}) {
-			c.JSON(http.StatusOK, struct {
-				StatusCode int                   `json:"statusCode"`
-				Message    string                `json:"message"`
-				Data       model.CategoryProduct `json:"categoryProduct"`
-			}{http.StatusOK, "success to get data", *currentModel})
+			c.JSON(http.StatusOK, response.ResponseCategoryProduct {
+				StatusCode:		http.StatusOK,
+				Message:		"success to get data",
+				CategoryProduct:	*currentModel,
+			})
 			return
 		}
 	}
 
-	c.JSON(http.StatusInternalServerError, struct {
-		StatusCode int    `json:"statusCode"`
-		Message    string `json:"message"`
-	}{http.StatusInternalServerError, "Somethings wrong!"})
+	c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+		StatusCode:	http.StatusInternalServerError,
+		Message:	"Somethings wrong!",
+	})
 	return
 }
 
@@ -63,43 +64,43 @@ func CreateCategoryProduct(c *gin.Context) {
 	requestCategoryProduct := model.CategoryProduct{}
 
 	if err := c.Bind(&requestCategoryProduct); err != nil {
-		c.JSON(http.StatusBadRequest, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusBadRequest, "Invalid request"})
+		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"Invalid request",
+		})
 		return
 	}
 
 	if strings.Trim(requestCategoryProduct.Category, " ") == "" {
-		c.JSON(http.StatusBadRequest, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusBadRequest, "Category name can't be empty"})
+		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"Category name can't be empty",
+		})
 		return
 	} else {
 		requestCategoryProduct.Audit.CreatedAt = time.Now().Format("2006-01-02 15:05:03")
 		create, err := requestCategoryProduct.SaveCategoryProduct()
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, struct {
-				StatusCode int    `json:"statusCode"`
-				Message    string `json:"message"`
-			}{http.StatusInternalServerError, fmt.Sprintf("%v", err)})
+			c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+				StatusCode:	http.StatusInternalServerError,
+				Message:	fmt.Sprintf("%v", err),
+			})
 			return
 		}
 
 		if create != (&model.CategoryProduct{}) {
-			c.JSON(http.StatusOK, struct {
-				StatusCode int    `json:"statusCode"`
-				Message    string `json:"message"`
-			}{http.StatusOK, "Success to create category product"})
+			c.JSON(http.StatusOK, response.ResponseGeneric {
+				StatusCode:	http.StatusOK,
+				Message:	"Success to create category product",
+			})
 			return
 		}
 	}
 
-	c.JSON(http.StatusInternalServerError, struct {
-		StatusCode int    `json:"statusCode"`
-		Message    string `json:"message"`
-	}{http.StatusOK, "Somethings wrong!"})
+	c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+		StatusCode:	http.StatusInternalServerError,
+		Message:	"Somethings wrong!",
+	})
 	return
 }
 
@@ -108,52 +109,51 @@ func UpdateCategoryProductById(c *gin.Context) {
 	requestCategoryProduct := model.CategoryProduct{}
 
 	if err := c.Bind(&requestCategoryProduct); err != nil {
-		c.JSON(http.StatusBadRequest, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusBadRequest, "Somethings wrong!"})
+		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"Somethings wrong!",
+		})
 		return
 	}
 
 	if categoryProductId != requestCategoryProduct.CategoryProductId {
-		c.JSON(http.StatusBadRequest, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusBadRequest, "Invalid format!"})
+		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"Invalid format!",
+		})
 		return
 	}
 
 	if strings.Trim(categoryProductId, " ") == "" || strings.Trim(requestCategoryProduct.CategoryProductId, " ") == "" {
-		c.JSON(http.StatusBadRequest, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusBadRequest, "CategoryProductId can't be empty"})
+		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"CategoryProductId can't be empty",
+		})
 		return
 	} else if strings.Trim(requestCategoryProduct.Category, " ") == "" {
-		c.JSON(http.StatusBadRequest, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusBadRequest, "Category name can't be empty"})
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"Category name can't be empty"})
 		return
 	}
 
 	categoryProductModel := model.CategoryProduct{}
 	isThere, err := categoryProductModel.IsCategoryProductExistsById(categoryProductId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusNotFound, fmt.Sprintf("%s", err)})
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	fmt.Sprintf("%s", err),
+		})
 		return
 	}
 
 	if isThere {
 		currentModel, err := categoryProductModel.FindCategoryProductById(categoryProductId)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, struct {
-				StatusCode int    `json:"statusCode"`
-				Message    string `json:"message"`
-			}{http.StatusInternalServerError, fmt.Sprintf("%s", err)})
+			c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+				StatusCode:	http.StatusInternalServerError,
+				Message:	fmt.Sprintf("%s", err),
+			})
 			return
 		}
 
@@ -166,27 +166,26 @@ func UpdateCategoryProductById(c *gin.Context) {
 		updatedModel, err := currentModel.UpdateCategoryProduct()
 		if err != nil {
 			log.Printf("%v", err)
-			c.JSON(http.StatusInternalServerError, struct {
-				StatusCode int    `json:"statusCode"`
-				Message    string `json:"message"`
-			}{http.StatusInternalServerError, "Somethings wrong!"})
+			c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+				StatusCode:	http.StatusInternalServerError,
+				Message:	"Somethings wrong!",
+			})
 			return
 		}
 
 		if updatedModel != (&model.CategoryProduct{}) {
-			c.JSON(http.StatusOK, struct {
-				StatusCode int                   `json:"statusCode"`
-				Message    string                `json:"message"`
-				Data       model.CategoryProduct `json:"categoryProduct"`
-			}{http.StatusOK, "success to update data", *updatedModel})
+			c.JSON(http.StatusOK, response.ResponseCategoryProduct {
+				StatusCode:		http.StatusOK,
+				Message:		"success to update data",
+				CategoryProduct:	*updatedModel})
 			return
 		}
 	}
 
-	c.JSON(http.StatusInternalServerError, struct {
-		StatusCode int    `json:"statusCode"`
-		Message    string `json:"message"`
-	}{http.StatusInternalServerError, "Somethings wrong!"})
+	c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+		StatusCode:	http.StatusInternalServerError,
+		Message:	"Somethings wrong!",
+	})
 	return
 }
 
@@ -194,46 +193,47 @@ func DeleteCategoryProductById(c *gin.Context) {
 	categoryProductId := c.Param("categoryProductId")
 
 	if strings.Trim(categoryProductId, " ") == "" {
-		c.JSON(http.StatusBadRequest, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusBadRequest, "CategoryProduct can't be empty"})
+		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"CategoryProduct can't be empty",
+		})
 		return
 	}
 
 	categoryProductModel := model.CategoryProduct{}
 	isThere, err := categoryProductModel.IsCategoryProductExistsById(categoryProductId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusNotFound, fmt.Sprintf("%s", err)})
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	fmt.Sprintf("%s", err),
+		})
 		return
 	}
 
 	if isThere {
 		isSuccess, err := categoryProductModel.DeleteCategoryProductById(categoryProductId)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, struct {
-				StatusCode int    `json:"statusCode"`
-				Message    string `json:"message"`
-			}{http.StatusInternalServerError, fmt.Sprintf("%s", err)})
+			c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+				StatusCode:	http.StatusInternalServerError,
+				Message:	fmt.Sprintf("%s", err),
+			})
 			return
 		}
 
 		if isSuccess {
-			c.JSON(http.StatusOK, struct {
-				StatusCode int    `json:"statusCode"`
-				Message    string `json:"message"`
-			}{http.StatusOK, "Success to delete category product"})
+			c.JSON(http.StatusOK, response.ResponseGeneric {
+				StatusCode:	http.StatusOK,
+				Message:	"Success to delete category product",
+			})
 			return
 		}
 	}
 
-	c.JSON(http.StatusInternalServerError, struct {
-		StatusCode int    `json:"statusCode"`
-		Message    string `json:"message"`
-	}{http.StatusInternalServerError, "Somethings wrong!"})
+	c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+		StatusCode:	http.StatusInternalServerError,
+		Message:	"Somethings wrong!",
+	})
+	return
 }
 
 func GetAllCategoryProduct(c *gin.Context) {
@@ -241,25 +241,25 @@ func GetAllCategoryProduct(c *gin.Context) {
 
 	listCategoryProduct, err := categoryProductModel.FindAllCategoryProduct()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusInternalServerError, "Somethings wrong!"})
+		c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"Somethings wrong!",
+		})
 		return
 	}
 
 	if len(listCategoryProduct) != 0 {
-		c.JSON(http.StatusOK, struct {
-			StatusCode int                      `json:"statusCode"`
-			Message    string                   `json:"message"`
-			Data       []*model.CategoryProduct `json:"listCategoryProduct"`
-		}{http.StatusOK, "Success to get all category product", listCategoryProduct})
+		c.JSON(http.StatusOK, response.ResponseCategoryProducts {
+			StatusCode:		http.StatusOK,
+			Message:		"Success to get all category product",
+			CategoryProducts:	listCategoryProduct,
+		})
 		return
 	} else {
-		c.JSON(http.StatusNotFound, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusNotFound, "List category product is empty"})
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"List category product is empty",
+		})
 		return
 	}
 }
@@ -268,10 +268,10 @@ func GetAllProductByCategoryProductId(c *gin.Context) {
 	categoryProductId := c.Param("categoryProductId")
 
 	if strings.Trim(categoryProductId, " ") == "" {
-		c.JSON(http.StatusBadRequest, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusBadRequest, "CategoryProduct can't be empty"})
+		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"CategoryProduct can't be empty",
+		})
 		return
 	}
 
@@ -279,35 +279,35 @@ func GetAllProductByCategoryProductId(c *gin.Context) {
 
 	_, err := categoryProductModel.IsCategoryProductExistsById(categoryProductId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusBadRequest, "Invalid request"})
+		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"Invalid request",
+		})
 		return
 	}
 
-	listCity, err := categoryProductModel.FindAllProductByCategoryProductId(categoryProductId)
+	listProduct, err := categoryProductModel.FindAllProductByCategoryProductId(categoryProductId)
 	if err != nil {
 		log.Printf("cpc: %v", err)
-		c.JSON(http.StatusBadRequest, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusBadRequest, "Somethings wrong!"})
+		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"Somethings wrong!",
+		})
 		return
 	}
 
-	if len(listCity) != 0 {
-		c.JSON(http.StatusOK, struct {
-			StatusCode int              `json:"statusCode"`
-			Message    string           `json:"message"`
-			Data       []*model.Product `json:"listProduct"`
-		}{http.StatusOK, "Success to get list", listCity})
+	if len(listProduct) != 0 {
+		c.JSON(http.StatusOK, response.ResponseProducts {
+			StatusCode:	http.StatusOK,
+			Message:	"Success to get list",
+			Products:	listProduct,
+		})
 		return
 	} else {
-		c.JSON(http.StatusNotFound, struct {
-			StatusCode int    `json:"statusCode"`
-			Message    string `json:"message"`
-		}{http.StatusNotFound, "Can't found the related list"})
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"Can't found the related list",
+		})
 		return
 	}
 }
