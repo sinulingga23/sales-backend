@@ -139,14 +139,30 @@ func (c *CategoryProduct) DeleteCategoryProductById(categoryProductId string) (b
 	return true, nil
 }
 
-func (c *CategoryProduct) FindAllCategoryProduct() ([]*CategoryProduct, error) {
+func (c *CategoryProduct) GetNumberRecords() (int, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return 0, err
+	}
+	defer db.Close()
+
+	numberRecords := 0
+	err = db.QueryRow("SELECT count(category_product_id) FROM category_product").Scan(&numberRecords)
+	if err != nil {
+		return 0, err
+	}
+	return numberRecords, nil
+}
+
+
+func (c *CategoryProduct) FindAllCategoryProduct(limit int, offset int) ([]*CategoryProduct, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return []*CategoryProduct{}, err
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT category_product_id, category, created_at, updated_at FROM category_product")
+	rows, err := db.Query("SELECT category_product_id, category, created_at, updated_at FROM category_product LIMIT ? OFFSET ?", limit, offset)
 	if err != nil {
 		return []*CategoryProduct{}, err
 	}

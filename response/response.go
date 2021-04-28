@@ -9,6 +9,12 @@ type ResponseGeneric struct {
 	Message 	string 	`json:"message"`
 }
 
+type InfoPagination struct {
+	CurrentPage		int	`json:"currentPage"`
+	RowsEachPage		int	`json:"rowsEachPage"`
+	TotalPages		int	`json:"totalPages"`
+}
+
 type ResponseErrors struct {
 	StatusCode	int 	`json:"statusCode"`
 	Message 	string 	`json:"message"`
@@ -37,6 +43,9 @@ type ResponseCategoryProducts struct {
 	StatusCode 		int 				`json:"statusCode"`
 	Message 		string				`json:"message"`
 	CategoryProducts 	[]*model.CategoryProduct	`json:"categoryProducts"`
+	InfoPagination		InfoPagination			`json:"infoPagination"`
+	NextPage		string				`json:"nextPage"`
+	PrevPage		string				`json:"prevPage"`
 }
 
 type ResponseCity struct {

@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"strconv"
 	"time"
 
 	"sales-backend/model"
@@ -237,9 +238,57 @@ func DeleteCategoryProductById(c *gin.Context) {
 }
 
 func GetAllCategoryProduct(c *gin.Context) {
+	requestPage := c.DefaultQuery("page", "1")
+	requestLimit := c.DefaultQuery("limit", "10")
 	categoryProductModel := model.CategoryProduct{}
 
-	listCategoryProduct, err := categoryProductModel.FindAllCategoryProduct()
+	page := 0
+	limit := 0
+	page, err := strconv.Atoi(requestPage)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"The parameters invalid",
+			Errors:		"Not Valid",
+		})
+		return
+	}
+
+	limit, err = strconv.Atoi(requestLimit)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"The parameters invalid",
+			Errors:		"Not Valid",
+		})
+		return
+	}
+
+	if page <= 0 {
+		page = 1
+	}
+
+	if limit <= 0 {
+		limit = 10
+	}
+
+	numberRecords, err := categoryProductModel.GetNumberRecords()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"Somethings wrong!",
+			Errors:		"Internal Error",
+		})
+		return
+	}
+
+	totalPages := 0
+	if totalPages = numberRecords / limit; numberRecords % limit != 0 {
+		totalPages += 1
+	}
+	offset := limit * (page - 1)
+
+	listCategoryProduct, err := categoryProductModel.FindAllCategoryProduct(limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
 			StatusCode:	http.StatusInternalServerError,
@@ -248,11 +297,27 @@ func GetAllCategoryProduct(c *gin.Context) {
 		return
 	}
 
+	nextPage := fmt.Sprintf("/api/category-products?page=%d&limit=%d", page+1, limit)
+	prevPage := fmt.Sprintf("/api/category-products?page=%d&limit=%d", page-1, limit)
+
+	if (page+1) > totalPages {
+		nextPage = ""
+	} else if page-1 < 1 {
+		prevPage = ""
+	}
+
 	if len(listCategoryProduct) != 0 {
 		c.JSON(http.StatusOK, response.ResponseCategoryProducts {
 			StatusCode:		http.StatusOK,
-			Message:		"Success to get all category product",
+			Message:		"Success to get the category products",
 			CategoryProducts:	listCategoryProduct,
+			InfoPagination:		response.InfoPagination {
+				CurrentPage:	page,
+				RowsEachPage:	limit,
+				TotalPages:	totalPages,
+			},
+			NextPage:		nextPage,
+			PrevPage:		prevPage,
 		})
 		return
 	} else {
