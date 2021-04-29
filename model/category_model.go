@@ -187,14 +187,14 @@ func (c *CategoryProduct) FindAllCategoryProduct(limit int, offset int) ([]*Cate
 	return result, nil
 }
 
-func (c *CategoryProduct) FindAllProductByCategoryProductId(categoryProductId string) ([]*Product, error) {
+func (c *CategoryProduct) FindAllProductByCategoryProductId(categoryProductId string, limit int, offset int) ([]*Product, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return []*Product{}, errors.New("Somethings wrong!")
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT p.product_id, p.category_product_id, p.name, p.unit, p.price, p.stock, p.created_at, p.updated_at FROM product p INNER JOIN category_product cp ON p.category_product_id = cp.category_product_id HAVING p.category_product_id = ?", categoryProductId)
+	rows, err := db.Query("SELECT p.product_id, p.category_product_id, p.name, p.unit, p.price, p.stock, p.created_at, p.updated_at FROM product p INNER JOIN category_product cp ON p.category_product_id = cp.category_product_id HAVING p.category_product_id = ? LIMIT ? OFFSET ?", categoryProductId, limit, offset)
 	if err != nil {
 		log.Printf("query: %v", err)
 		return []*Product{}, errors.New("Somethings wrong!")
