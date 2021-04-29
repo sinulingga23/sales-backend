@@ -274,6 +274,7 @@ func GetAllCategoryProduct(c *gin.Context) {
 
 	numberRecords, err := categoryProductModel.GetNumberRecords()
 	if err != nil {
+		log.Printf("%v", err)
 		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
 			StatusCode:	http.StatusInternalServerError,
 			Message:	"Somethings wrong!",
@@ -330,7 +331,31 @@ func GetAllCategoryProduct(c *gin.Context) {
 }
 
 func GetAllProductByCategoryProductId(c *gin.Context) {
+	requestPage := c.DefaultQuery("page", "1")
+	requestLimit := c.DefaultQuery("limit", "10")
 	categoryProductId := c.Param("categoryProductId")
+
+	page := 0
+	limit := 0
+	page, err := strconv.Atoi(requestPage)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"The parameters invalid",
+			Errors:		"Not Valid",
+		})
+		return
+	}
+
+	limit, err = strconv.Atoi(requestLimit)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"The paramaters invalid",
+			Errors:		"Not Valid",
+		})
+		return
+	}
 
 	if strings.Trim(categoryProductId, " ") == "" {
 		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
@@ -342,7 +367,7 @@ func GetAllProductByCategoryProductId(c *gin.Context) {
 
 	categoryProductModel := model.CategoryProduct{}
 
-	_, err := categoryProductModel.IsCategoryProductExistsById(categoryProductId)
+	_, err = categoryProductModel.IsCategoryProductExistsById(categoryProductId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
 			StatusCode:	http.StatusBadRequest,
@@ -351,7 +376,49 @@ func GetAllProductByCategoryProductId(c *gin.Context) {
 		return
 	}
 
-	listProduct, err := categoryProductModel.FindAllProductByCategoryProductId(categoryProductId)
+	productModel := model.Product{}
+	numberRecordsProduct, err := productModel.GetNumberRecordsByCategoryProductId(categoryProductId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"Somethings wrong!",
+			Errors:		"Internal Error",
+		})
+		return
+	}
+
+	if page < 0 {
+		page = 1
+	}
+
+	if limit < 0 {
+		limit = 10
+	} else if limit > 25 {
+		limit = 25
+	}
+
+	totalPages := 0
+	if totalPages = numberRecordsProduct / limit; numberRecordsProduct % limit != 0 {
+		totalPages += 1
+	}
+
+	nextPage := fmt.Sprintf("api/category-products/%s/products?page=%d&limit=%d", categoryProductId, page+1, limit)
+	prevPage := fmt.Sprintf("api/category-products/%s/products?page=%d&limit=%d", categoryProductId, page-1, limit)
+
+	if (page+1) > totalPages {
+		nextPage = ""
+	} else if (page-1) < 1 {
+		prevPage = ""
+	}
+
+	if (page >= 1 && limit >= numberRecordsProduct) {
+		page = 1
+		limit = numberRecordsProduct
+		prevPage = ""
+	}
+	offset := limit * (page - 1)
+
+	listProduct, err := categoryProductModel.FindAllProductByCategoryProductId(categoryProductId, limit, offset)
 	if err != nil {
 		log.Printf("cpc: %v", err)
 		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
@@ -362,10 +429,19 @@ func GetAllProductByCategoryProductId(c *gin.Context) {
 	}
 
 	if len(listProduct) != 0 {
-		c.JSON(http.StatusOK, response.ResponseProducts {
-			StatusCode:	http.StatusOK,
-			Message:	"Success to get list",
-			Products:	listProduct,
+
+		c.JSON(http.StatusOK, response.ResponseProductsByCategoryProductId {
+			StatusCode:		http.StatusOK,
+			Message:		"Success to get products by category id",
+			CategoryProductId:	categoryProductId,
+			Products:		listProduct,
+			InfoPagination:		response.InfoPagination {
+				CurrentPage:	page,
+				RowsEachPage:	limit,
+				TotalPages:	totalPages,
+			},
+			NextPage: nextPage,
+			PrevPage: prevPage,
 		})
 		return
 	} else {
