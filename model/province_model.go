@@ -13,6 +13,21 @@ type Province struct {
 	Audit		Audit	`json:"audit"`
 }
 
+func (p *Province) GetNumberRecords() (int, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return 0, err
+	}
+	defer db.Close()
+
+	numberRecords := 0
+	err = db.QueryRow("SELECT COUNT(province_id) FROM province").Scan(&numberRecords)
+	if err != nil {
+		return 0, err
+	}
+
+	return numberRecords, nil
+}
 
 func (p *Province) IsProvinceExistsById(provinceId int) (bool, error) {
 	db, err := utility.ConnectDB()
@@ -130,14 +145,14 @@ func (p *Province) DeleteProvinceById(provinceId int) (bool, error) {
 	return true, nil
 }
 
-func (p *Province) FindAllProvince() ([]*Province, error) {
+func (p *Province) FindAllProvince(limit int, offset int) ([]*Province, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return []*Province{}, err
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT province_id, province, created_at, updated_at FROM province")
+	rows, err := db.Query("SELECT province_id, province, created_at, updated_at FROM province LIMIT ? OFFSET ?", limit, offset)
 	if err != nil {
 		return []*Province{}, errors.New("Somethings wrong!")
 	}

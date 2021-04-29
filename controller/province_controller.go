@@ -264,9 +264,67 @@ func DeleteProvinceById(c *gin.Context) {
 }
 
 func GetProvinces(c *gin.Context) {
+	requestPage := c.DefaultQuery("page", "1")
+	requestLimit := c.DefaultQuery("limit", "10")
 	provinceModel := model.Province{}
 
-	provinces, err := provinceModel.FindAllProvince()
+	page := 0
+	page, err := strconv.Atoi(requestPage)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"The parameters invalid",
+			Errors:		"Not Valid",
+		})
+		return
+	}
+
+	limit := 0
+	limit, err = strconv.Atoi(requestLimit)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"The parameters invalid",
+			Errors:		"Not Valid",
+		})
+		return
+	}
+
+	if page < 0 {
+		page = 1
+	}
+
+
+	if limit < 0 {
+		limit = 10
+	} else if (limit > 25) {
+		limit = 25
+	}
+
+	numberRecords, err := provinceModel.GetNumberRecords()
+
+	totalPages := 0
+	if totalPages = numberRecords / limit; numberRecords % limit != 0 {
+		totalPages += 1
+	}
+
+	nextPage := fmt.Sprintf("api/provinces?page=%d&limit=%d", page+1, limit)
+	prevPage := fmt.Sprintf("api/provinces?page=%d&limit=%d", page-1, limit)
+
+	if (page+1) > totalPages {
+		nextPage = ""
+	} else if (page-1) < 1 {
+		prevPage = ""
+	}
+
+	if (page >= 1 && limit >= numberRecords) {
+		page = 1
+		limit = numberRecords
+		prevPage = ""
+	}
+	offset := limit * (page-1)
+
+	provinces, err := provinceModel.FindAllProvince(limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
 			StatusCode:	http.StatusInternalServerError,
@@ -281,6 +339,13 @@ func GetProvinces(c *gin.Context) {
 			StatusCode:	http.StatusOK,
 			Message:	"Success to get the provinces",
 			Provinces:	provinces,
+			InfoPagination:	response.InfoPagination {
+				CurrentPage:	page,
+				RowsEachPage:	limit,
+				TotalPages:	totalPages,
+			},
+			NextPage:	nextPage,
+			PrevPage:	prevPage,
 		})
 		return
 	} else {
