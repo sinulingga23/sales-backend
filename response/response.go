@@ -18,7 +18,7 @@ type InfoPagination struct {
 type ResponseErrors struct {
 	StatusCode	int 	`json:"statusCode"`
 	Message 	string 	`json:"message"`
-	Errors		string 	`json:"erros"`
+	Errors		string 	`json:"errors"`
 }
 
 type ResponseProvince struct {
@@ -64,4 +64,14 @@ type ResponseProducts struct {
 	StatusCode	int			`json:"statusCode"`
 	Message		string			`json:"message"`
 	Products	[]*model.Product	`json:"products"`
+}
+
+type ResponseProductsByCategoryProductId struct {
+	StatusCode		int			`json:"statusCode"`
+	Message			string			`json:"message"`
+	CategoryProductId	string			`json:"categoryProductId"`
+	Products		[]*model.Product	`json:"products"`
+	InfoPagination		InfoPagination		`json:"infoPagination"`
+	NextPage		string			`json:"nextPage"`
+	PrevPage		string			`json:"prevPage"`
 }
