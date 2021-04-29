@@ -358,9 +358,34 @@ func GetProvinces(c *gin.Context) {
 }
 
 func GetCitiesByProvinceId(c *gin.Context) {
+	requestPage := c.DefaultQuery("page", "1")
+	requestLimit := c.DefaultQuery("limit", "10")
 	provinceId := 0
 
-	provinceId, err := strconv.Atoi(c.Param("provinceId"))
+	page := 0
+	page, err := strconv.Atoi(requestPage)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"The parameters invalid",
+			Errors:		"Not Valid",
+		})
+		return
+	}
+
+	limit := 0
+	limit, err = strconv.Atoi(requestLimit)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"The parameters invalid",
+			Errors:		"Not Valid",
+		})
+		return
+	}
+
+
+	provinceId, err = strconv.Atoi(c.Param("provinceId"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors {
 			StatusCode:	http.StatusBadRequest,
@@ -381,8 +406,53 @@ func GetCitiesByProvinceId(c *gin.Context) {
 		return
 	}
 
+	if page < 0 {
+		page = 1
+	}
+
+	if limit < 0 {
+		limit = 10
+	} else if limit > 25 {
+		limit = 25
+	}
+
+	cityModel := model.City{}
+	numberRecordsCity := 0
+	numberRecordsCity, err =  cityModel.GetNumberRecordsByProvinceId(provinceId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"Somethings wrong!",
+			Errors:		"Internal Error",
+		})
+		return
+	}
+
+	totalPages := 0
+	if totalPages = numberRecordsCity / limit; numberRecordsCity % limit != 0 {
+		totalPages += 1
+	}
+
+	nextPage := fmt.Sprintf("api/provinces/%d/cities?page=%d&limit=%d", provinceId, page+1, limit)
+	prevPage := fmt.Sprintf("api/provinces/%d/cities?page=%d&limit=%d", provinceId, page-1, limit)
+
+	if (page+1) > totalPages {
+		nextPage = ""
+		page = 1
+	} else if (page-1) < 1 {
+		prevPage = ""
+		page = 1
+	}
+
+	if page >= 1 && limit >= numberRecordsCity {
+		page = 1
+		limit = numberRecordsCity
+		prevPage = ""
+	}
+	offset := limit * (page-1)
+
 	if isThere {
-		cities, err := provinceModel.FindAllCityByProvinceId(provinceId)
+		cities, err := provinceModel.FindAllCityByProvinceId(provinceId, limit, offset)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
 				StatusCode:	http.StatusInternalServerError,
@@ -393,10 +463,18 @@ func GetCitiesByProvinceId(c *gin.Context) {
 		}
 
 		if len(cities) != 0 {
-			c.JSON(http.StatusOK, response.ResponseCities {
+			c.JSON(http.StatusOK, response.ResponseCitiesByProvinceId {
 				StatusCode:	http.StatusOK,
 				Message:	"Success to get the cities by provinceId",
+				ProvinceId:	provinceId,
 				Cities:		cities,
+				InfoPagination:	response.InfoPagination {
+					CurrentPage:	page,
+					RowsEachPage:	limit,
+					TotalPages:	totalPages,
+				},
+				NextPage:	nextPage,
+				PrevPage:	prevPage,
 			})
 			return
 		} else {

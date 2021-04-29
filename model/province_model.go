@@ -177,14 +177,14 @@ func (p *Province) FindAllProvince(limit int, offset int) ([]*Province, error) {
 	return result, nil
 }
 
-func (p *Province) FindAllCityByProvinceId(provinceId int) ([]*City, error) {
+func (p *Province) FindAllCityByProvinceId(provinceId int, limit int, offset int) ([]*City, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return []*City{}, err
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT c.city_id, c.province_id, c.city, c.created_at, c.updated_at FROM city c INNER JOIN province p ON c.province_id = p.province_id HAVING c.province_id = ?",provinceId)
+	rows, err := db.Query("SELECT c.city_id, c.province_id, c.city, c.created_at, c.updated_at FROM city c INNER JOIN province p ON c.province_id = p.province_id HAVING c.province_id = ? LIMIT ? OFFSET ?", provinceId, limit, offset)
 	if err != nil {
 		return []*City{}, err
 	}

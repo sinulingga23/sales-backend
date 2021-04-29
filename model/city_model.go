@@ -161,3 +161,19 @@ func (c *City) FindAllCity() ([]*City, error) {
 
 	return result, nil
 }
+
+func (c *City) GetNumberRecordsByProvinceId(provinceId int) (int, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return 0, err
+	}
+	defer db.Close()
+
+	numberRecords := 0
+	err = db.QueryRow("SELECT COUNT(city_id) FROM city WHERE province_id = ?", provinceId).Scan(&numberRecords)
+	if err != nil {
+		return 0, err
+	}
+
+	return numberRecords, nil
+}

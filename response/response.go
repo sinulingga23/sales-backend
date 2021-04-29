@@ -63,6 +63,17 @@ type ResponseCities struct {
 	Cities		[]*model.City	`json:"cities"`
 }
 
+type ResponseCitiesByProvinceId struct {
+	StatusCode	int 			`json:"statusCode"`
+	Message		string			`json:"message"`
+	ProvinceId	int 			`json:"provinceId"`
+	Cities 		[]*model.City		`json:"cities"`
+	InfoPagination	InfoPagination		`json:"infoPagination"`
+	NextPage	string 			`json:"nextPage"`
+	PrevPage	string 			`json:"prevPage"`
+}
+
+
 type ResponseProducts struct {
 	StatusCode	int			`json:"statusCode"`
 	Message		string			`json:"message"`
