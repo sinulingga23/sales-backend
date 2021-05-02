@@ -25,6 +25,7 @@ func RunServer() {
 
 	// cities
 	router.GET("api/cities/:cityId", GetCityById)
+	router.POST("api/cities", CreateCity)
 
 	router.Run(":8080")
 }
