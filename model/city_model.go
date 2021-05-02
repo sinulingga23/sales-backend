@@ -42,7 +42,7 @@ func (c *City) SaveCity() (*City, error) {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("INSERT INTO (province_id, city, created_at) VALUES (?, ?, ?)",
+	result, err := db.Exec("INSERT INTO city (province_id, city, created_at) VALUES (?, ?, ?)",
 		c.ProvinceId,
 		c.City,
 		c.Audit.CreatedAt)
