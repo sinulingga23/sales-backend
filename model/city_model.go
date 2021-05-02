@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"log"
 	"errors"
 
 	"sales-backend/utility"
@@ -90,17 +91,21 @@ func (c *City) UpdateCityById(cityId int) (*City, error) {
 		c.ProvinceId,
 		c.City,
 		c.Audit.CreatedAt,
-		c.Audit.UpdatedAt)
+		c.Audit.UpdatedAt,
+		cityId)
 	if err != nil {
+		log.Printf("%s", err)
 		return &City{}, errors.New("Somethings wrong!")
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
+		log.Printf("%s", err)
 		return &City{}, errors.New("Somethings wrong!")
 	}
 
 	if rowsAffected != 1 {
+		log.Printf("%s", err)
 		return &City{}, errors.New("Somethings wrong!")
 	}
 
