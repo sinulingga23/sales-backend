@@ -58,9 +58,12 @@ type ResponseCity struct {
 }
 
 type ResponseCities struct {
-	StatusCode	int		`json:"statusCode"`
-	Message		string 		`json:"message"`
-	Cities		[]*model.City	`json:"cities"`
+	StatusCode 		int		`json:"statusCode"`
+	Message 		string		`json:"message"`
+	Cities		 	[]*model.City	`json:"cities"`
+	InfoPagination		InfoPagination	`json:"infoPagination"`
+	NextPage		string		`json:"nextPage"`
+	PrevPage		string		`json:"prevPage"`
 }
 
 type ResponseCitiesByProvinceId struct {

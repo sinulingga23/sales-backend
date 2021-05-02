@@ -136,14 +136,14 @@ func (c *City) DeleteCityById(cityId int) (bool, error) {
 	return true, nil
 }
 
-func (c *City) FindAllCity() ([]*City, error) {
+func (c *City) FindAllCity(limit int, offset int) ([]*City, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return []*City{}, errors.New("Somethings wrong!")
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT city_id, province_id, city, created_at, updated_at FROM city")
+	rows, err := db.Query("SELECT city_id, province_id, city, created_at, updated_at FROM city LIMIT ? OFFSET ?", limit, offset)
 	if err != nil {
 		return []*City{}, errors.New("Somethings wrong!")
 	}
@@ -165,6 +165,22 @@ func (c *City) FindAllCity() ([]*City, error) {
 	}
 
 	return result, nil
+}
+
+func (c *City) GetNumberRecords() (int, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return 0, err
+	}
+	defer db.Close()
+
+	numberRecords := 0
+	err = db.QueryRow("SELECT COUNT(city_id) FROM city").Scan(&numberRecords)
+	if err != nil {
+		return 0, err
+	}
+
+	return numberRecords, nil
 }
 
 func (c *City) GetNumberRecordsByProvinceId(provinceId int) (int, error) {

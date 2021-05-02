@@ -316,3 +316,114 @@ func DeleteCityById(c *gin.Context) {
 	})
 	return
 }
+
+
+func GetCities(c *gin.Context) {
+	requestPage := c.DefaultQuery("page", "1")
+	requestLimit := c.DefaultQuery("limit", "10")
+	cityModel := model.City{}
+
+	page := 0
+	page, err := strconv.Atoi(requestPage)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"The parameters invalid",
+			Errors:		"Not Valid",
+		})
+		return
+	}
+
+	limit := 0
+	limit, err = strconv.Atoi(requestLimit)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"The parameters invalid",
+			Errors:		"Not Valid",
+		})
+		return
+	}
+
+	if page < 0 {
+		page = 1
+	}
+
+	if limit < 0 {
+		limit = 10
+	} else if limit > 25 {
+		limit = 25
+	}
+
+	numberRecords := 0
+	numberRecords, err = cityModel.GetNumberRecords()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"Somethings wrong!",
+			Errors:		"Internal Error",
+		})
+		return
+	}
+
+	totalPages := 0
+	if totalPages = numberRecords / limit; numberRecords % limit != 0 {
+		totalPages += 1
+	}
+
+	nextPage := fmt.Sprintf("api/cities?page=%d&limit=%d", page+1, limit)
+	prevPage := fmt.Sprintf("api/cities?page=%d&limit=%d", page-1, limit)
+
+	if (page+1) > totalPages {
+		nextPage = ""
+		page = 1
+	} else if (page-1) < 1 {
+		prevPage = ""
+		page =1
+	}
+
+	if page >= 1 && limit >= numberRecords {
+		page = 1
+		limit = numberRecords
+		prevPage = ""
+	}
+	offset := limit * (page-1)
+
+	cities, err := cityModel.FindAllCity(limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message: 	"Somethings wrong!",
+			Errors: 	fmt.Sprintf("%s", err),
+		})
+		return
+	}
+
+	if len(cities) != 0 {
+		c.JSON(http.StatusOK, response.ResponseCitiesByProvinceId {
+			StatusCode:	http.StatusOK,
+			Message:	"Success to get the cities",
+			Cities:		cities,
+			InfoPagination:	response.InfoPagination {
+				CurrentPage:	page,
+				RowsEachPage:	limit,
+				TotalPages:	totalPages,
+			},
+			NextPage:	nextPage,
+			PrevPage:	prevPage,
+		})
+		return
+	} else {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The cities is empty",
+		})
+		return
+	}
+
+	c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+		StatusCode:	http.StatusInternalServerError,
+		Message:	"Somethings wrong!",
+	})
+	return
+}

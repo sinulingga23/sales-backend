@@ -28,6 +28,7 @@ func RunServer() {
 	router.POST("api/cities", CreateCity)
 	router.PUT("api/cities/:cityId", UpdateCityById)
 	router.DELETE("api/cities/:cityId", DeleteCityById)
+	router.GET("api/cities", GetCities)
 
 	router.Run(":8080")
 }
