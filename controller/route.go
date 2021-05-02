@@ -23,5 +23,8 @@ func RunServer() {
 	router.GET("api/provinces",GetProvinces)
 	router.GET("api/provinces/:provinceId/cities", GetCitiesByProvinceId)
 
+	// cities
+	router.GET("api/cities/:cityId", GetCityById)
+
 	router.Run(":8080")
 }
