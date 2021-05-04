@@ -427,3 +427,145 @@ func GetCities(c *gin.Context) {
 	})
 	return
 }
+
+func GetSubDistrictsByCityId(c *gin.Context) {
+	requestPage := c.DefaultQuery("page", "1")
+	requestLimit := c.DefaultQuery("limit", "10")
+	cityId := 0
+
+	page := 0
+	page, err := strconv.Atoi(requestPage)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"The parameters invalid",
+			Errors:		"Not Valid",
+		})
+		return
+	}
+
+	limit := 0
+	limit, err = strconv.Atoi(requestLimit)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"The parameters invalid",
+			Errors:		"Not Valid",
+		})
+		return
+	}
+
+	cityId, err = strconv.Atoi(c.Param("cityId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"Invalid Request",
+			Errors:		fmt.Sprintf("%s", err),
+		})
+		return
+	}
+
+	cityModel := model.City{}
+	isThere, err := cityModel.IsCityExistsById(cityId)
+	if err != nil {
+		c.JSON(http.StatusNotFound, response.ResponseErrors {
+			StatusCode:	http.StatusNotFound,
+			Message:	"Not Found",
+			Errors:		fmt.Sprintf("%s", err),
+		})
+		return
+	}
+
+	if page < 0 {
+		page = 1
+	}
+
+	if limit < 0 {
+		limit = 10
+	} else if limit > 25 {
+		limit = 25
+	}
+
+	subDistrictModel := model.SubDistrict{}
+	numberRecordsSubDistrict := 0
+	numberRecordsSubDistrict, err = subDistrictModel.GetNumberRecordsByCityId(cityId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"Somethings wrong!",
+			Errors:		"Internal Error",
+		})
+		return
+	}
+
+	totalPages := 0
+	if totalPages = numberRecordsSubDistrict / limit; numberRecordsSubDistrict % limit != 0 {
+		totalPages += 1
+	}
+
+	nextPage := fmt.Sprintf("api/cities/%d/sub-districts?page=%d&limit=%d", cityId, page+1, limit)
+	prevPage := fmt.Sprintf("api/cities/%d/sub-districts?page=%d&limit=%d", cityId, page-1, limit)
+
+	if (page+1) > totalPages {
+		nextPage = ""
+		page = 1
+	} else if (page-1) < 1 {
+		prevPage = ""
+		page = 1
+	}
+
+	if page >= 1 && limit >= numberRecordsSubDistrict {
+		page = 1
+		limit = numberRecordsSubDistrict
+		prevPage = ""
+	}
+	offset := limit * (page-1)
+
+	if isThere {
+		subDistricts, err := cityModel.FindAllSubDistrictByCityId(cityId, limit, offset)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+				StatusCode:	http.StatusInternalServerError,
+				Message: 	"Somethings wrong!",
+				Errors: 	fmt.Sprintf("%s", err),
+			})
+			return
+		}
+
+		if len(subDistricts) != 0 {
+			c.JSON(http.StatusOK, response.ResponseSubDistrictsByCityId {
+				StatusCode:	http.StatusOK,
+				Message:	"Success to get the sub-districts by cityId",
+				CityId:		cityId,
+				SubDistricts:	subDistricts,
+				InfoPagination:	response.InfoPagination {
+					CurrentPage:	page,
+					RowsEachPage:	limit,
+					TotalPages:	totalPages,
+				},
+				NextPage:	nextPage,
+				PrevPage:	prevPage,
+			})
+			return
+		} else {
+			c.JSON(http.StatusNotFound, response.ResponseGeneric {
+				StatusCode:	http.StatusNotFound,
+				Message:	"Can't found the sub-districts by cityId",
+			})
+			return
+		}
+	} else {
+		c.JSON(http.StatusNotFound, response.ResponseErrors {
+			StatusCode:	http.StatusNotFound,
+			Message:	"Not Found",
+			Errors:		fmt.Sprintf("%s", err),
+		})
+		return
+	}
+
+	c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+		StatusCode:	http.StatusInternalServerError,
+		Message:	"Somethings wrong!",
+	})
+	return
+}
