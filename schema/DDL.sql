@@ -176,3 +176,10 @@ ALTER TABLE sub_district DROP FOREIGN KEY `sub_district_city_id_foreign`;
 ALTER TABLE city MODIFY `city_id` INT NOT NULL AUTO_INCREMENT;
 ALTER TABLE `address` ADD CONSTRAINT `address_city_id_foreign` FOREIGN KEY(city_id) REFERENCES city(city_id) ON UPDATE CASCADE ON DELETE NO ACTION;
 ALTER TABLE `sub_district` ADD CONSTRAINT `sub_district_city_id_foreign` FOREIGN KEY(city_id) REFERENCES city(city_id) ON UPDATE CASCADE ON DELETE NO ACTION;
+
+LOCK TABLE sub_district WRITE;
+LOCK TABLE address WRITE;
+ALTER TABLE address DROP FOREIGN KEY `address_sub_district_id_foreign`;
+ALTER TABLE sub_district MODIFY `sub_district_id` INT NOT NULL AUTO_INCREMENT;
+ALTER TABLE address ADD CONSTRAINT `address_sub_district_id_foreign` FOREIGN KEY(sub_district_id) REFERENCES sub_district(sub_district_id) ON UPDATE CASCADE ON DELETE NO ACTION;
+UNLOCK TABLES;
