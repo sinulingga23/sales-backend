@@ -167,6 +167,41 @@ func (c *City) FindAllCity(limit int, offset int) ([]*City, error) {
 	return result, nil
 }
 
+func (c *City) FindAllSubDistrictByCityId(cityId int, limit int, offset int) ([]*SubDistrict, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		log.Printf("%v", err)
+		return []*SubDistrict{}, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT sb.sub_district_id, sb.city_id, sb.sub_district, sb.created_at, sb.updated_at FROM sub_district sb INNER JOIN city c ON sb.city_id = c.city_id HAVING sb.city_id = ? LIMIT ? OFFSET ?", cityId, limit, offset)
+	if err != nil {
+		log.Printf("%v", err)
+		return []*SubDistrict{}, errors.New("Somethings wrong!")
+	}
+	defer rows.Close()
+
+	result := []*SubDistrict{}
+	for rows.Next() {
+		each := &SubDistrict{}
+		err = rows.Scan(&each.SubDistrictId, &each.CityId, &each.SubDistrict, &each.Audit.CreatedAt, &each.Audit.UpdatedAt)
+		if err != nil {
+			log.Printf("%v", err)
+			return []*SubDistrict{}, errors.New("Somethings wrong!")
+		}
+
+		result = append(result, each)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Printf("%v", err)
+		return []*SubDistrict{}, errors.New("Somethings wrong!")
+	}
+
+	return result, nil
+}
+
 func (c *City) GetNumberRecords() (int, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
