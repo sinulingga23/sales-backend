@@ -15,6 +15,22 @@ type SubDistrict struct {
 	Audit		Audit	`json:"audit"`
 }
 
+func (sD *SubDistrict) GetNumberRecords() (int, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return 0, err
+	}
+	defer db.Close()
+
+	numberRecords := 0
+	err = db.QueryRow("SELECT COUNT(sub_district_id) FROM sub_district").Scan(&numberRecords)
+	if err != nil {
+		return 0, err
+	}
+
+	return numberRecords, nil
+}
+
 func (sD *SubDistrict) GetNumberRecordsByCityId(cityId int) (int, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
@@ -34,6 +50,7 @@ func (sD *SubDistrict) GetNumberRecordsByCityId(cityId int) (int, error) {
 func (sD *SubDistrict) IsSubDistrictExistsById(subDistrictId int) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
+		log.Printf("%s", err)
 		return false, errors.New("Somethings wrong!")
 	}
 	defer db.Close()
@@ -41,6 +58,7 @@ func (sD *SubDistrict) IsSubDistrictExistsById(subDistrictId int) (bool, error) 
 	check := 0;
 	err = db.QueryRow("SELECT COUNT(sub_district_id) FROM sub_district WHERE sub_district_id = ?", subDistrictId).Scan(&check)
 	if err != nil {
+		log.Printf("%s", err)
 		return false, errors.New("Somethings wrong!")
 	}
 
@@ -78,13 +96,15 @@ func (sD *SubDistrict) SaveSubDistrict() (*SubDistrict, error) {
 func (sD *SubDistrict) FindSubDistrictById(subDistrictId int) (*SubDistrict, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
+		log.Printf("%s", err)
 		return &SubDistrict{}, errors.New("Somethings wrong!")
 	}
 	defer db.Close()
 
-	err = db.QueryRow("SELECT sub_district_id, city_id, city, created_at, updated_at FROM city WHERE city_id = ?", subDistrictId).
+	err = db.QueryRow("SELECT sub_district_id, city_id, sub_district, created_at, updated_at FROM sub_district WHERE sub_district_id = ?", subDistrictId).
 		Scan(&sD.SubDistrictId, &sD.CityId, &sD.SubDistrict, &sD.Audit.CreatedAt, &sD.Audit.UpdatedAt)
 	if err != nil {
+		log.Printf("%s", err)
 		return &SubDistrict{}, errors.New("Somethings wrong!")
 	}
 
