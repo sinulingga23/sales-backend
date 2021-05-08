@@ -93,6 +93,21 @@ type ResponseProductsByCategoryProductId struct {
 	PrevPage		string			`json:"prevPage"`
 }
 
+type ResponseSubDistrict struct {
+	StatusCode	int 			`json:"statusCode"`
+	Message		string 			`json:"message"`
+	SubDistrict	model.SubDistrict	`json:"subDistrict"`
+}
+
+type ResponseSubDistricts struct {
+	StatusCode 		int			`json:"statusCode"`
+	Message 		string			`json:"message"`
+	SubDistricts		[]*model.SubDistrict	`json:"subDistricts"`
+	InfoPagination		InfoPagination		`json:"infoPagination"`
+	NextPage		string			`json:"nextPage"`
+	PrevPage		string			`json:"prevPage"`
+}
+
 type ResponseSubDistrictsByCityId struct {
 	StatusCode	int 			`json:"statusCode"`
 	Message		string			`json:"message"`
