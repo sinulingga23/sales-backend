@@ -89,3 +89,88 @@ func (a *Address) SaveAddress() (*Address, error) {
 	a.AddressId = int(currentId)
 	return a, nil
 }
+
+func (a *Address) UpdateAddressById(addressId int) (*Address, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return &Address{}, err
+	}
+	defer db.Close()
+
+	result, err := db.Exec("UPDATE address SET address_id = ?, province_id = ?, city_id = ?, sub_district_id = ?, address = ?, created_at = ?, updated_at = ? WHERE address_id = ?",
+		a.AddressId,
+		a.ProvinceId,
+		a.CityId,
+		a.SubDistrictId,
+		a.Address,
+		a.Audit.CreatedAt,
+		a.Audit.UpdatedAt,
+		addressId)
+	if err != nil {
+		return &Address{}, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return &Address{}, err
+	}
+
+	if rowsAffected != 1 {
+		return &Address{}, errors.New("Somethings wrong!")
+	}
+
+	return a, nil
+}
+
+func (a *Address) DeleteAddressById(addressId int) (bool, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return false, err
+	}
+	defer db.Close()
+
+	result, err :=  db.Exec("DELETE FROM address WHERE address_id = ?", addressId)
+	if err != nil {
+		return false, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return false, errors.New("Somethings wrong!")
+	}
+
+	if rowsAffected != 1 {
+		return false, errors.New("Somethings wrong!")
+	}
+
+	return true, nil
+}
+
+func (a *Address) FindAllAddress(limit int, offset int) ([]*Address, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		log.Printf("%s", err)
+		return []*Address{}, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT address_id, province_id, city_id, sub_district_id, address, created_at, updated_at FROM address LIMIT ? OFFSET ?", limit, offset)
+	if err != nil {
+		log.Printf("%s", err)
+		return []*Address{}, err
+	}
+	defer rows.Close()
+
+	result := []*Address{}
+	for rows.Next() {
+		each := &Address{}
+		err = rows.Scan(&each.AddressId, &each.ProvinceId, &each.CityId, &each.SubDistrictId, &each.Address, &each.Audit.CreatedAt, &each.Audit.UpdatedAt)
+		if err != nil {
+			return []*Address{}, err
+		}
+
+		result = append(result, each)
+	}
+
+	return result, nil
+}
