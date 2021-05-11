@@ -196,5 +196,9 @@ func (sD *SubDistrict) FindAllSubDistrict(limit int, offset int) ([]*SubDistrict
 		result = append(result, each)
 	}
 
+	if err = rows.Err(); err != nil {
+		return []*SubDistrict{}, errors.New("Somethings wrong!")
+	}
+
 	return result, nil
 }
