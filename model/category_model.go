@@ -27,7 +27,7 @@ func (c *CategoryProduct) IsCategoryProductExistsById(categoryProductId string) 
 	}
 
 	if check != 1 {
-		return false, errors.New(fmt.Sprintf("The category product with id %s is not exists.", categoryProductId))
+		return false, nil
 	}
 	return true, nil
 }

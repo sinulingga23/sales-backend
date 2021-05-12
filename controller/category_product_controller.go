@@ -27,14 +27,21 @@ func GetCategoryProductById(c *gin.Context) {
 	categoryProductModel := model.CategoryProduct{}
 	isThere, err := categoryProductModel.IsCategoryProductExistsById(categoryProductId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, response.ResponseGeneric {
-			StatusCode:	http.StatusNotFound,
-			Message:	fmt.Sprintf("%s", err),
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle the request",
+			Errors:		fmt.Sprintf("%s", err),
 		})
 		return
 	}
 
-	if isThere {
+	if !isThere {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The category is not exists.",
+		})
+		return
+	} else if isThere {
 		currentModel, err := categoryProductModel.FindCategoryProductById(categoryProductId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
@@ -141,14 +148,21 @@ func UpdateCategoryProductById(c *gin.Context) {
 	categoryProductModel := model.CategoryProduct{}
 	isThere, err := categoryProductModel.IsCategoryProductExistsById(categoryProductId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, response.ResponseGeneric {
-			StatusCode:	http.StatusNotFound,
-			Message:	fmt.Sprintf("%s", err),
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle the request",
+			Errors:		fmt.Sprintf("%s", err),
 		})
 		return
 	}
 
-	if isThere {
+	if !isThere {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The category is not exists.",
+		})
+		return
+	} else if isThere {
 		currentModel, err := categoryProductModel.FindCategoryProductById(categoryProductId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
@@ -204,14 +218,21 @@ func DeleteCategoryProductById(c *gin.Context) {
 	categoryProductModel := model.CategoryProduct{}
 	isThere, err := categoryProductModel.IsCategoryProductExistsById(categoryProductId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, response.ResponseGeneric {
-			StatusCode:	http.StatusNotFound,
-			Message:	fmt.Sprintf("%s", err),
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle the request",
+			Errors:		fmt.Sprintf("%s", err),
 		})
 		return
 	}
 
-	if isThere {
+	if !isThere {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The category is not exists.",
+		})
+		return
+	} else if isThere {
 		isSuccess, err := categoryProductModel.DeleteCategoryProductById(categoryProductId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
@@ -366,89 +387,96 @@ func GetAllProductByCategoryProductId(c *gin.Context) {
 	}
 
 	categoryProductModel := model.CategoryProduct{}
-
-	_, err = categoryProductModel.IsCategoryProductExistsById(categoryProductId)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
-			StatusCode:	http.StatusBadRequest,
-			Message:	"Invalid request",
-		})
-		return
-	}
-
-	productModel := model.Product{}
-	numberRecordsProduct, err := productModel.GetNumberRecordsByCategoryProductId(categoryProductId)
+	isThere, err := categoryProductModel.IsCategoryProductExistsById(categoryProductId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
 			StatusCode:	http.StatusInternalServerError,
-			Message:	"Somethings wrong!",
-			Errors:		"Internal Error",
+			Message:	"The server can't handle the request",
+			Errors:		fmt.Sprintf("%s", err),
 		})
 		return
 	}
 
-	if page < 0 {
-		page = 1
-	}
-
-	if limit < 0 {
-		limit = 10
-	} else if limit > 25 {
-		limit = 25
-	}
-
-	totalPages := 0
-	if totalPages = numberRecordsProduct / limit; numberRecordsProduct % limit != 0 {
-		totalPages += 1
-	}
-
-	nextPage := fmt.Sprintf("api/category-products/%s/products?page=%d&limit=%d", categoryProductId, page+1, limit)
-	prevPage := fmt.Sprintf("api/category-products/%s/products?page=%d&limit=%d", categoryProductId, page-1, limit)
-
-	if (page+1) > totalPages {
-		nextPage = ""
-	} else if (page-1) < 1 {
-		prevPage = ""
-	}
-
-	if (page >= 1 && limit >= numberRecordsProduct) {
-		page = 1
-		limit = numberRecordsProduct
-		prevPage = ""
-	}
-	offset := limit * (page - 1)
-
-	listProduct, err := categoryProductModel.FindAllProductByCategoryProductId(categoryProductId, limit, offset)
-	if err != nil {
-		log.Printf("cpc: %v", err)
-		c.JSON(http.StatusBadRequest, response.ResponseGeneric {
-			StatusCode:	http.StatusBadRequest,
-			Message:	"Somethings wrong!",
-		})
-		return
-	}
-
-	if len(listProduct) != 0 {
-
-		c.JSON(http.StatusOK, response.ResponseProductsByCategoryProductId {
-			StatusCode:		http.StatusOK,
-			Message:		"Success to get products by category id",
-			CategoryProductId:	categoryProductId,
-			Products:		listProduct,
-			InfoPagination:		response.InfoPagination {
-				CurrentPage:	page,
-				RowsEachPage:	limit,
-				TotalPages:	totalPages,
-			},
-			NextPage: nextPage,
-			PrevPage: prevPage,
-		})
-		return
-	} else {
+	if !isThere {
 		c.JSON(http.StatusNotFound, response.ResponseGeneric {
 			StatusCode:	http.StatusNotFound,
-			Message:	"Can't found the related list",
+			Message:	"The category is not exists.",
 		})
 		return
+	} else if isThere {
+		productModel := model.Product{}
+		numberRecordsProduct, err := productModel.GetNumberRecordsByCategoryProductId(categoryProductId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+				StatusCode:	http.StatusInternalServerError,
+				Message:	"Somethings wrong!",
+				Errors:		"Internal Error",
+			})
+			return
+		}
+
+		if page < 0 {
+			page = 1
+		}
+
+		if limit < 0 {
+			limit = 10
+		} else if limit > 25 {
+			limit = 25
+		}
+
+		totalPages := 0
+		if totalPages = numberRecordsProduct / limit; numberRecordsProduct % limit != 0 {
+			totalPages += 1
+		}
+
+		nextPage := fmt.Sprintf("api/category-products/%s/products?page=%d&limit=%d", categoryProductId, page+1, limit)
+		prevPage := fmt.Sprintf("api/category-products/%s/products?page=%d&limit=%d", categoryProductId, page-1, limit)
+
+		if (page+1) > totalPages {
+			nextPage = ""
+		} else if (page-1) < 1 {
+			prevPage = ""
+		}
+
+		if (page >= 1 && limit >= numberRecordsProduct) {
+			page = 1
+			limit = numberRecordsProduct
+			prevPage = ""
+		}
+		offset := limit * (page - 1)
+
+		listProduct, err := categoryProductModel.FindAllProductByCategoryProductId(categoryProductId, limit, offset)
+		if err != nil {
+			log.Printf("cpc: %v", err)
+			c.JSON(http.StatusBadRequest, response.ResponseGeneric {
+				StatusCode:	http.StatusBadRequest,
+				Message:	"Somethings wrong!",
+			})
+			return
+		}
+
+		if len(listProduct) != 0 {
+			c.JSON(http.StatusOK, response.ResponseProductsByCategoryProductId {
+				StatusCode:		http.StatusOK,
+				Message:		"Success to get products by category id",
+				CategoryProductId:	categoryProductId,
+				Products:		listProduct,
+				InfoPagination:		response.InfoPagination {
+					CurrentPage:	page,
+					RowsEachPage:	limit,
+					TotalPages:	totalPages,
+				},
+				NextPage: nextPage,
+				PrevPage: prevPage,
+			})
+			return
+		} else {
+			c.JSON(http.StatusNotFound, response.ResponseGeneric {
+				StatusCode:	http.StatusNotFound,
+				Message:	"Can't found the related list",
+			})
+			return
+		}
 	}
 }
