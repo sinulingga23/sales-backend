@@ -27,17 +27,23 @@ func GetProvinceById(c *gin.Context) {
 	}
 
 	provinceModel := model.Province{}
-	isThere, err := provinceModel.IsProvinceExistsById(provinceId);
+	isThere, err := provinceModel.IsProvinceExistsById(provinceId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, response.ResponseErrors {
-			StatusCode:	http.StatusNotFound,
-			Message:	fmt.Sprintf("%s", err),
-			Errors:		"Not Found",
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle the request",
+			Errors:		fmt.Sprintf("%s", err),
 		})
 		return
 	}
 
-	if isThere {
+	if !isThere {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The province is not exists.",
+		})
+		return
+	} else if isThere {
 		currentProvince, err := provinceModel.FindProvinceById(provinceId);
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
@@ -162,15 +168,21 @@ func UpdateProvinceById(c *gin.Context) {
 	provinceModel := model.Province{}
 	isThere, err := provinceModel.IsProvinceExistsById(provinceId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, response.ResponseErrors {
-			StatusCode:	http.StatusNotFound,
-			Message:	fmt.Sprintf("%s", err),
-			Errors:		"Not Found",
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle the request",
+			Errors:		fmt.Sprintf("%s", err),
 		})
 		return
 	}
 
-	if isThere {
+	if !isThere {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The province is not exists.",
+		})
+		return
+	} else if isThere {
 		currentProvince, err := provinceModel.FindProvinceById(provinceId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
@@ -228,15 +240,21 @@ func DeleteProvinceById(c *gin.Context) {
 	provinceModel := model.Province{}
 	isThere, err := provinceModel.IsProvinceExistsById(provinceId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, response.ResponseErrors {
-			StatusCode:	http.StatusNotFound,
-			Message:	fmt.Sprintf("%s", err),
-			Errors:		"Not Found",
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle the request",
+			Errors:		fmt.Sprintf("%s", err),
 		})
 		return
 	}
 
-	if isThere {
+	if !isThere {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The province is not exists.",
+		})
+		return
+	} else if isThere {
 		isDeleted, err := provinceModel.DeleteProvinceById(provinceId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
@@ -398,60 +416,66 @@ func GetCitiesByProvinceId(c *gin.Context) {
 	provinceModel := model.Province{}
 	isThere, err := provinceModel.IsProvinceExistsById(provinceId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, response.ResponseErrors {
-			StatusCode:	http.StatusNotFound,
-			Message:	"Not Found",
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle the request",
 			Errors:		fmt.Sprintf("%s", err),
 		})
 		return
 	}
 
-	if page < 0 {
-		page = 1
-	}
-
-	if limit < 0 {
-		limit = 10
-	} else if limit > 25 {
-		limit = 25
-	}
-
-	cityModel := model.City{}
-	numberRecordsCity := 0
-	numberRecordsCity, err =  cityModel.GetNumberRecordsByProvinceId(provinceId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
-			StatusCode:	http.StatusInternalServerError,
-			Message:	"Somethings wrong!",
-			Errors:		"Internal Error",
+	if !isThere {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The province is not exists.",
 		})
 		return
-	}
+	} else if isThere {
+		if page < 0 {
+			page = 1
+		}
 
-	totalPages := 0
-	if totalPages = numberRecordsCity / limit; numberRecordsCity % limit != 0 {
-		totalPages += 1
-	}
+		if limit < 0 {
+			limit = 10
+		} else if limit > 25 {
+			limit = 25
+		}
 
-	nextPage := fmt.Sprintf("api/provinces/%d/cities?page=%d&limit=%d", provinceId, page+1, limit)
-	prevPage := fmt.Sprintf("api/provinces/%d/cities?page=%d&limit=%d", provinceId, page-1, limit)
+		cityModel := model.City{}
+		numberRecordsCity := 0
+		numberRecordsCity, err =  cityModel.GetNumberRecordsByProvinceId(provinceId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+				StatusCode:	http.StatusInternalServerError,
+				Message:	"Somethings wrong!",
+				Errors:		"Internal Error",
+			})
+			return
+		}
 
-	if (page+1) > totalPages {
-		nextPage = ""
-		page = 1
-	} else if (page-1) < 1 {
-		prevPage = ""
-		page = 1
-	}
+		totalPages := 0
+		if totalPages = numberRecordsCity / limit; numberRecordsCity % limit != 0 {
+			totalPages += 1
+		}
 
-	if page >= 1 && limit >= numberRecordsCity {
-		page = 1
-		limit = numberRecordsCity
-		prevPage = ""
-	}
-	offset := limit * (page-1)
+		nextPage := fmt.Sprintf("api/provinces/%d/cities?page=%d&limit=%d", provinceId, page+1, limit)
+		prevPage := fmt.Sprintf("api/provinces/%d/cities?page=%d&limit=%d", provinceId, page-1, limit)
 
-	if isThere {
+		if (page+1) > totalPages {
+			nextPage = ""
+			page = 1
+		} else if (page-1) < 1 {
+			prevPage = ""
+			page = 1
+		}
+
+		if page >= 1 && limit >= numberRecordsCity {
+			page = 1
+			limit = numberRecordsCity
+			prevPage = ""
+		}
+		offset := limit * (page-1)
+
 		cities, err := provinceModel.FindAllCityByProvinceId(provinceId, limit, offset)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
@@ -484,13 +508,6 @@ func GetCitiesByProvinceId(c *gin.Context) {
 			})
 			return
 		}
-	} else {
-		c.JSON(http.StatusNotFound, response.ResponseErrors {
-			StatusCode:	http.StatusNotFound,
-			Message:	"Not Found",
-			Errors:		fmt.Sprintf("%s", err),
-		})
-		return
 	}
 
 	c.JSON(http.StatusInternalServerError, response.ResponseGeneric {

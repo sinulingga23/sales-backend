@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"errors"
 
 	"sales-backend/utility"
@@ -43,8 +42,9 @@ func (p *Province) IsProvinceExistsById(provinceId int) (bool, error) {
 	}
 
 	if check != 1 {
-		return false, errors.New(fmt.Sprintf("The province with id %d is not exists.", provinceId))
+		return false, nil
 	}
+
 	return true, nil
 }
 

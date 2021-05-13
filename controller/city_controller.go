@@ -93,16 +93,21 @@ func CreateCity(c *gin.Context) {
 	}
 	isThereProvince, err := provinceModel.IsProvinceExistsById(requestCity.ProvinceId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, response.ResponseErrors {
-			StatusCode:	http.StatusNotFound,
-			Message:	"Somethings wrong!",
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle the request",
 			Errors:		fmt.Sprintf("%s", err),
 		})
-		log.Printf("%s", err)
 		return
 	}
 
-	if isThereProvince {
+	if !isThereProvince {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The province is not exists.",
+		})
+		return
+	} else if isThereProvince {
 		if strings.Trim(requestCity.City, " ") == "" {
 			c.JSON(http.StatusBadRequest, response.ResponseGeneric {
 				StatusCode:	http.StatusBadRequest,
@@ -185,16 +190,21 @@ func UpdateCityById(c *gin.Context) {
 
 	isThereProvince, err := provinceModel.IsProvinceExistsById(requestCity.ProvinceId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, response.ResponseErrors {
-			StatusCode:	http.StatusNotFound,
-			Message:	fmt.Sprintf("%s", err),
-			Errors:		"Not Found",
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle the request",
+			Errors:		fmt.Sprintf("%s", err),
 		})
-		log.Printf("%s", err)
 		return
 	}
 
-	if isThereProvince {
+	if !isThereProvince {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The province is not exists.",
+		})
+		return
+	} else if isThereProvince {
 		cityModel := model.City{}
 		isThereCity, err := cityModel.IsCityExistsById(requestCity.CityId)
 		if err != nil {
