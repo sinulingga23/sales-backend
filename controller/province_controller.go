@@ -259,13 +259,19 @@ func DeleteProvinceById(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
 				StatusCode:	http.StatusInternalServerError,
-				Message:	"Somethings wrong!",
+				Message:	"The server can't handle the request",
 				Errors:		fmt.Sprintf("%s", err),
 			})
 			return
 		}
 
-		if isDeleted {
+		if !isDeleted {
+			c.JSON(http.StatusNotFound, response.ResponseGeneric {
+				StatusCode:	http.StatusNotFound,
+				Message:	"The province is not exists.",
+			})
+			return
+		} else if isDeleted {
 			c.JSON(http.StatusOK, response.ResponseGeneric {
 				StatusCode:	http.StatusOK,
 				Message:	"Success to delete province.",

@@ -139,7 +139,7 @@ func (p *Province) DeleteProvinceById(provinceId int) (bool, error) {
 	}
 
 	if rowsAffected != 1 {
-		return false, errors.New("Somethings wrong!")
+		return false, nil
 	}
 
 	return true, nil
