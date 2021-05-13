@@ -134,7 +134,7 @@ func (c *CategoryProduct) DeleteCategoryProductById(categoryProductId string) (b
 		return false, errors.New("Somethings wrong!")
 	}
 	if rowsAffected != 1 {
-		return false, errors.New("Somethings wrong!")
+		return false, nil
 	}
 	return true, nil
 }

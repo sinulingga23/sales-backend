@@ -235,14 +235,20 @@ func DeleteCategoryProductById(c *gin.Context) {
 	} else if isThere {
 		isSuccess, err := categoryProductModel.DeleteCategoryProductById(categoryProductId)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
 				StatusCode:	http.StatusInternalServerError,
-				Message:	fmt.Sprintf("%s", err),
+				Message:	"The server can't handle the request",
+				Errors:		fmt.Sprintf("%s", err),
 			})
-			return
 		}
 
-		if isSuccess {
+		if !isSuccess {
+			c.JSON(http.StatusNotFound, response.ResponseGeneric {
+				StatusCode:	http.StatusNotFound,
+				Message:	"The category is not exists.",
+			})
+			return
+		} else if isSuccess {
 			c.JSON(http.StatusOK, response.ResponseGeneric {
 				StatusCode:	http.StatusOK,
 				Message:	"Success to delete category product",
