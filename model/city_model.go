@@ -30,7 +30,7 @@ func (c *City) IsCityExistsById(cityId int) (bool, error) {
 	}
 
 	if check != 1 {
-		return false, errors.New(fmt.Sprintf("City with id %d is not exists.", cityId))
+		return false, nil
 	}
 
 	return true, nil
@@ -130,7 +130,7 @@ func (c *City) DeleteCityById(cityId int) (bool, error) {
 	}
 
 	if rowsAffected != 1 {
-		return false, errors.New("Somethings wrong!")
+		return false, nil
 	}
 
 	return true, nil
