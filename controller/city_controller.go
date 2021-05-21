@@ -27,20 +27,25 @@ func GetCityById(c *gin.Context) {
 		return
 	}
 
-
 	cityModel := model.City{}
 	isThere, err := cityModel.IsCityExistsById(cityId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, response.ResponseErrors {
-			StatusCode:	http.StatusNotFound,
-			Message:	fmt.Sprintf("%s", err),
-			Errors:		"Not Found",
-		})
 		log.Printf("%s", err)
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle request",
+			Errors:		fmt.Sprintf("%s", err),
+		})
 		return
 	}
 
-	if isThere {
+	if !isThere {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The City is not exists",
+		})
+		return
+	} else if isThere {
 		currentCity, err := cityModel.FindCityById(cityId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
@@ -208,16 +213,21 @@ func UpdateCityById(c *gin.Context) {
 		cityModel := model.City{}
 		isThereCity, err := cityModel.IsCityExistsById(requestCity.CityId)
 		if err != nil {
-			c.JSON(http.StatusNotFound, response.ResponseErrors {
-				StatusCode:	http.StatusNotFound,
-				Message:	fmt.Sprintf("%s", err),
-				Errors:		"Not Found",
+			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+				StatusCode:	http.StatusInternalServerError,
+				Message:	"The server can't handle the request",
+				Errors:		fmt.Sprintf("%s", err),
 			})
-			log.Printf("%s", err)
 			return
 		}
 
-		if isThereCity {
+		if !isThereCity {
+			c.JSON(http.StatusNotFound, response.ResponseGeneric {
+				StatusCode:	http.StatusNotFound,
+				Message:	"The City is not exists",
+			})
+			return
+		} else if isThereCity {
 			currentCity, err := cityModel.FindCityById(cityId)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
@@ -290,28 +300,39 @@ func DeleteCityById(c *gin.Context) {
 	cityModel := model.City{}
 	isThere, err := cityModel.IsCityExistsById(cityId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, response.ResponseErrors {
-			StatusCode:	http.StatusNotFound,
-			Message:	fmt.Sprintf("%s", err),
-			Errors:		"Not Found",
-		})
 		log.Printf("%s", err)
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle request",
+			Errors:		fmt.Sprintf("%s", err),
+		})
 		return
 	}
 
-	if isThere {
+	if !isThere {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The City is not exists",
+		})
+		return
+	} else if isThere {
 		isDeleted, err := cityModel.DeleteCityById(cityId)
 		if err != nil {
+			log.Printf("%s", err)
 			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
 				StatusCode:	http.StatusInternalServerError,
-				Message:	"Somethings wrong!",
+				Message:	"The server can't handle request",
 				Errors:		fmt.Sprintf("%s", err),
 			})
-			log.Printf("%s", err)
 			return
 		}
 
-		if isDeleted {
+		if !isDeleted {
+			c.JSON(http.StatusNotFound, response.ResponseGeneric {
+				StatusCode:	http.StatusNotFound,
+				Message:	"The City is not exists",
+			})
+		} else if isDeleted {
 			c.JSON(http.StatusOK, response.ResponseGeneric {
 				StatusCode:	http.StatusOK,
 				Message:	"Success to delete the city.",
@@ -478,60 +499,67 @@ func GetSubDistrictsByCityId(c *gin.Context) {
 	cityModel := model.City{}
 	isThere, err := cityModel.IsCityExistsById(cityId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, response.ResponseErrors {
-			StatusCode:	http.StatusNotFound,
-			Message:	"Not Found",
+		log.Printf("%s", err)
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle request",
 			Errors:		fmt.Sprintf("%s", err),
 		})
 		return
 	}
 
-	if page < 0 {
-		page = 1
-	}
-
-	if limit < 0 {
-		limit = 10
-	} else if limit > 25 {
-		limit = 25
-	}
-
-	subDistrictModel := model.SubDistrict{}
-	numberRecordsSubDistrict := 0
-	numberRecordsSubDistrict, err = subDistrictModel.GetNumberRecordsByCityId(cityId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
-			StatusCode:	http.StatusInternalServerError,
-			Message:	"Somethings wrong!",
-			Errors:		"Internal Error",
+	if !isThere {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The City is not exists",
 		})
 		return
-	}
+	} else if isThere {
+		if page < 0 {
+			page = 1
+		}
 
-	totalPages := 0
-	if totalPages = numberRecordsSubDistrict / limit; numberRecordsSubDistrict % limit != 0 {
-		totalPages += 1
-	}
+		if limit < 0 {
+			limit = 10
+		} else if limit > 25 {
+			limit = 25
+		}
 
-	nextPage := fmt.Sprintf("api/cities/%d/sub-districts?page=%d&limit=%d", cityId, page+1, limit)
-	prevPage := fmt.Sprintf("api/cities/%d/sub-districts?page=%d&limit=%d", cityId, page-1, limit)
+		subDistrictModel := model.SubDistrict{}
+		numberRecordsSubDistrict := 0
+		numberRecordsSubDistrict, err = subDistrictModel.GetNumberRecordsByCityId(cityId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+				StatusCode:	http.StatusInternalServerError,
+				Message:	"Somethings wrong!",
+				Errors:		"Internal Error",
+			})
+			return
+		}
 
-	if (page+1) > totalPages {
-		nextPage = ""
-		page = 1
-	} else if (page-1) < 1 {
-		prevPage = ""
-		page = 1
-	}
+		totalPages := 0
+		if totalPages = numberRecordsSubDistrict / limit; numberRecordsSubDistrict % limit != 0 {
+			totalPages += 1
+		}
 
-	if page >= 1 && limit >= numberRecordsSubDistrict {
-		page = 1
-		limit = numberRecordsSubDistrict
-		prevPage = ""
-	}
-	offset := limit * (page-1)
+		nextPage := fmt.Sprintf("api/cities/%d/sub-districts?page=%d&limit=%d", cityId, page+1, limit)
+		prevPage := fmt.Sprintf("api/cities/%d/sub-districts?page=%d&limit=%d", cityId, page-1, limit)
 
-	if isThere {
+		if (page+1) > totalPages {
+			nextPage = ""
+			page = 1
+		} else if (page-1) < 1 {
+			prevPage = ""
+			page = 1
+		}
+
+		if page >= 1 && limit >= numberRecordsSubDistrict {
+			page = 1
+			limit = numberRecordsSubDistrict
+			prevPage = ""
+		}
+		offset := limit * (page-1)
+
 		subDistricts, err := cityModel.FindAllSubDistrictByCityId(cityId, limit, offset)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
@@ -564,13 +592,6 @@ func GetSubDistrictsByCityId(c *gin.Context) {
 			})
 			return
 		}
-	} else {
-		c.JSON(http.StatusNotFound, response.ResponseErrors {
-			StatusCode:	http.StatusNotFound,
-			Message:	"Not Found",
-			Errors:		fmt.Sprintf("%s", err),
-		})
-		return
 	}
 
 	c.JSON(http.StatusInternalServerError, response.ResponseGeneric {

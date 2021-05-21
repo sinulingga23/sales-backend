@@ -91,16 +91,22 @@ func CreateSubDistrict(c *gin.Context) {
 	}
 	isThereCity, err := cityModel.IsCityExistsById(requestSubDistrict.CityId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, response.ResponseErrors {
-			StatusCode:	http.StatusNotFound,
-			Message:	"Somethings wrong!",
+		log.Printf("%s", err)
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle request",
 			Errors:		fmt.Sprintf("%s", err),
 		})
-		log.Printf("%s", err)
 		return
 	}
 
-	if isThereCity {
+	if !isThereCity {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The City is not exists",
+		})
+		return
+	} else if isThereCity {
 		if strings.Trim(requestSubDistrict.SubDistrict, " ") == "" {
 			c.JSON(http.StatusBadRequest, response.ResponseGeneric {
 				StatusCode:	http.StatusBadRequest,
@@ -183,16 +189,22 @@ func UpdateSubDistrictById(c *gin.Context) {
 
 	isThereCity, err := cityModel.IsCityExistsById(requestSubDistrict.CityId)
 	if err != nil {
-		c.JSON(http.StatusNotFound, response.ResponseErrors {
-			StatusCode:	http.StatusNotFound,
-			Message:	fmt.Sprintf("%s", err),
-			Errors:		"Not Found",
-		})
 		log.Printf("%s", err)
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle request",
+			Errors:		fmt.Sprintf("%s", err),
+		})
 		return
 	}
 
-	if isThereCity {
+	if !isThereCity {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The City is not exists",
+		})
+		return
+	} else if isThereCity {
 		subDistrictModel := model.SubDistrict{}
 		isThereSubDistrict, err := subDistrictModel.IsSubDistrictExistsById(requestSubDistrict.SubDistrictId)
 		if err != nil {
