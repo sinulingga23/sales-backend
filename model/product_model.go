@@ -67,7 +67,7 @@ func (p *Product) IsProductExistsById(productId string)  (bool, error) {
 	}
 
 	if check != 1 {
-		return false, errors.New(fmt.Sprintf("Product with id %d is not exists.", productId))
+		return false, nil
 	}
 
 	return true, err
@@ -225,7 +225,7 @@ func (p *Product) DeleteProductById(productId string) (bool, error) {
 	}
 
 	if rowsAffected != 1 {
-		return false, errors.New("Somethings wrong!")
+		return false, nil
 	}
 
 	return true, nil
