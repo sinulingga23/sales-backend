@@ -21,6 +21,12 @@ type ResponseErrors struct {
 	Errors		string 	`json:"errors"`
 }
 
+type ResponseInvalids struct {
+	StatusCode	int 			`json:"statusCode"`
+	Message 	string 			`json:"message"`
+	Invalids	map[string]string	`json:"invalids"`
+}
+
 type ResponseProvince struct {
 	StatusCode	int		`json:"statusCode"`
 	Message 	string		`json:"message"`
@@ -76,6 +82,12 @@ type ResponseCitiesByProvinceId struct {
 	PrevPage	string 			`json:"prevPage"`
 }
 
+
+type ResponseProduct struct {
+	StatusCode	int 		`json:"statusCode"`
+	Message		string		`json:"message"`
+	Product		model.Product	`json:"product"`
+}
 
 type ResponseProducts struct {
 	StatusCode	int			`json:"statusCode"`

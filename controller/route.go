@@ -38,5 +38,9 @@ func RunServer() {
 	router.DELETE("api/sub-districts/:subDistrictId", DeleteSubDistrictById)
 	router.GET("api/sub-districts", GetSubDistricts)
 
+	// products
+	router.GET("api/products/:productId", GetProductById)
+	router.POST("api/products", CreateProduct)
+
 	router.Run(":8080")
 }
