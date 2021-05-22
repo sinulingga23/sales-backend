@@ -11,7 +11,7 @@ import (
 type Product struct {
 	ProductId		string	`json:"productId"`
 	CategoryProductId	string  `json:"categoryProductId"`
-	Name             	string  `json:"product"`
+	Name             	string  `json:"name"`
 	Unit             	string  `json:"unit"`
 	Price            	float64 `json:"price"`
 	Stock            	int     `json:"stock"`
@@ -98,7 +98,7 @@ func (p *Product) SaveProduct() (*Product, error) {
 	productId += fmt.Sprintf("%d", number)
 	p.ProductId = productId
 
-	_, err = db.Exec("INSERT INTO product_id (produc_id, category_product_id, name, unit, price, stock, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+	_, err = db.Exec("INSERT INTO product (product_id, category_product_id, name, unit, price, stock, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
 		p.ProductId,
 		p.CategoryProductId,
 		p.Name,
