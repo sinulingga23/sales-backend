@@ -63,7 +63,7 @@ func (sD *SubDistrict) IsSubDistrictExistsById(subDistrictId int) (bool, error) 
 	}
 
 	if check != 1 {
-		return false, errors.New(fmt.Sprintf("sub-district with id %d is not exists.", subDistrictId))
+		return false, nil
 	}
 
 	return true, nil
@@ -155,7 +155,7 @@ func (sD *SubDistrict) DeleteSubDistrictById(subDistrictId int) (bool, error) {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("DELETE FROM sub_district WHERE sub_district = ?", subDistrictId)
+	result, err := db.Exec("DELETE FROM sub_district WHERE sub_district_id = ?", subDistrictId)
 	if err != nil{
 		return false, errors.New("Somethings wrong!")
 	}
@@ -166,7 +166,7 @@ func (sD *SubDistrict) DeleteSubDistrictById(subDistrictId int) (bool, error) {
 	}
 
 	if rowsAffected != 1 {
-		return false, errors.New("Somethings wrong!")
+		return false, nil
 	}
 
 	return true, nil
