@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"sales-backend/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -40,7 +41,7 @@ func RunServer() {
 
 	// products
 	router.GET("api/products/:productId", GetProductById)
-	router.POST("api/products", CreateProduct)
+	router.POST("api/products", middleware.ValidateProduct, CreateProduct)
 
 	router.Run(":8080")
 }

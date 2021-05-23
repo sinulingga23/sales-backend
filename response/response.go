@@ -24,7 +24,7 @@ type ResponseErrors struct {
 type ResponseInvalids struct {
 	StatusCode	int 			`json:"statusCode"`
 	Message 	string 			`json:"message"`
-	Invalids	map[string]string	`json:"invalids"`
+	Invalid		map[string]string	`json:"invalid"`
 }
 
 type ResponseProvince struct {
