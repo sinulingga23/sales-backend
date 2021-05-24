@@ -10,6 +10,7 @@ import (
 
 	"sales-backend/model"
 	"sales-backend/response"
+	"sales-backend/utility"
 	"github.com/gin-gonic/gin"
 )
 
@@ -291,14 +292,6 @@ func GetAllCategoryProduct(c *gin.Context) {
 		return
 	}
 
-	if page <= 0 {
-		page = 1
-	}
-
-	if limit <= 0 {
-		limit = 10
-	}
-
 	numberRecords, err := categoryProductModel.GetNumberRecords()
 	if err != nil {
 		log.Printf("%v", err)
@@ -310,11 +303,8 @@ func GetAllCategoryProduct(c *gin.Context) {
 		return
 	}
 
-	totalPages := 0
-	if totalPages = numberRecords / limit; numberRecords % limit != 0 {
-		totalPages += 1
-	}
-	offset := limit * (page - 1)
+	nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"category-products"}, &page, &limit, numberRecords)
+	offset := limit * (page-1)
 
 	listCategoryProduct, err := categoryProductModel.FindAllCategoryProduct(limit, offset)
 	if err != nil {
@@ -323,15 +313,6 @@ func GetAllCategoryProduct(c *gin.Context) {
 			Message:	"Somethings wrong!",
 		})
 		return
-	}
-
-	nextPage := fmt.Sprintf("/api/category-products?page=%d&limit=%d", page+1, limit)
-	prevPage := fmt.Sprintf("/api/category-products?page=%d&limit=%d", page-1, limit)
-
-	if (page+1) > totalPages {
-		nextPage = ""
-	} else if page-1 < 1 {
-		prevPage = ""
 	}
 
 	if len(listCategoryProduct) != 0 {
@@ -412,44 +393,8 @@ func GetAllProductByCategoryProductId(c *gin.Context) {
 	} else if isThere {
 		productModel := model.Product{}
 		numberRecordsProduct, err := productModel.GetNumberRecordsByCategoryProductId(categoryProductId)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
-				StatusCode:	http.StatusInternalServerError,
-				Message:	"Somethings wrong!",
-				Errors:		"Internal Error",
-			})
-			return
-		}
 
-		if page < 0 {
-			page = 1
-		}
-
-		if limit < 0 {
-			limit = 10
-		} else if limit > 25 {
-			limit = 25
-		}
-
-		totalPages := 0
-		if totalPages = numberRecordsProduct / limit; numberRecordsProduct % limit != 0 {
-			totalPages += 1
-		}
-
-		nextPage := fmt.Sprintf("api/category-products/%s/products?page=%d&limit=%d", categoryProductId, page+1, limit)
-		prevPage := fmt.Sprintf("api/category-products/%s/products?page=%d&limit=%d", categoryProductId, page-1, limit)
-
-		if (page+1) > totalPages {
-			nextPage = ""
-		} else if (page-1) < 1 {
-			prevPage = ""
-		}
-
-		if (page >= 1 && limit >= numberRecordsProduct) {
-			page = 1
-			limit = numberRecordsProduct
-			prevPage = ""
-		}
+		nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"category-products", categoryProductId, "products"}, &page, &limit, numberRecordsProduct)
 		offset := limit * (page - 1)
 
 		listProduct, err := categoryProductModel.FindAllProductByCategoryProductId(categoryProductId, limit, offset)
