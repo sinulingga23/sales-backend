@@ -20,13 +20,13 @@ func GetPaginateURL(paths []string, page *int, limit *int, numberRecords int) (s
 		tempLimit = 25
 	}
 
-	if (tempPage > numberRecords / tempLimit) {
-		tempPage = 1
-	}
-
 	totalPages := 0
 	if totalPages = numberRecords / tempLimit; numberRecords % tempLimit != 0 {
 		totalPages += 1
+	}
+
+	if (tempPage > totalPages) {
+		tempPage = totalPages
 	}
 
 	nextPage := ""
@@ -43,10 +43,10 @@ func GetPaginateURL(paths []string, page *int, limit *int, numberRecords int) (s
 
 	if (tempPage+1) > totalPages {
 		nextPage = ""
-		tempPage = 1
+		tempPage = totalPages
 	} else if (tempPage-1) < 1 {
 		prevPage = ""
-		tempPage =1
+		tempPage = 1
 	}
 
 	if tempPage >= 1 && tempLimit >= numberRecords {
@@ -57,5 +57,7 @@ func GetPaginateURL(paths []string, page *int, limit *int, numberRecords int) (s
 
 	*page = tempPage
 	*limit = tempLimit
+	log.Printf("page: %d\n", *page)
+	log.Printf("tempPage: %d\n", tempPage)
 	return nextPage, prevPage, totalPages
 }
