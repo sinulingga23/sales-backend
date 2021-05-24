@@ -393,7 +393,17 @@ func GetAllProductByCategoryProductId(c *gin.Context) {
 	} else if isThere {
 		productModel := model.Product{}
 		numberRecordsProduct, err := productModel.GetNumberRecordsByCategoryProductId(categoryProductId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+				StatusCode:	http.StatusInternalServerError,
+				Message:	"Somethings wrong!",
+				Errors:		"Internal Error",
+			})
+			return
+		}
 
+		log.Printf("req page: %d\n", page)
+		log.Printf("req limit: %d\n", limit)
 		nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"category-products", categoryProductId, "products"}, &page, &limit, numberRecordsProduct)
 		offset := limit * (page - 1)
 
