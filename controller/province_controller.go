@@ -10,6 +10,7 @@ import (
 
 	"sales-backend/model"
 	"sales-backend/response"
+	"sales-backend/utility"
 	"github.com/gin-gonic/gin"
 )
 
@@ -314,38 +315,17 @@ func GetProvinces(c *gin.Context) {
 		return
 	}
 
-	if page < 0 {
-		page = 1
-	}
-
-
-	if limit < 0 {
-		limit = 10
-	} else if (limit > 25) {
-		limit = 25
-	}
-
 	numberRecords, err := provinceModel.GetNumberRecords()
-
-	totalPages := 0
-	if totalPages = numberRecords / limit; numberRecords % limit != 0 {
-		totalPages += 1
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"Somethings wrong!",
+			Errors:		"Internal Error",
+		})
+		return
 	}
 
-	nextPage := fmt.Sprintf("api/provinces?page=%d&limit=%d", page+1, limit)
-	prevPage := fmt.Sprintf("api/provinces?page=%d&limit=%d", page-1, limit)
-
-	if (page+1) > totalPages {
-		nextPage = ""
-	} else if (page-1) < 1 {
-		prevPage = ""
-	}
-
-	if (page >= 1 && limit >= numberRecords) {
-		page = 1
-		limit = numberRecords
-		prevPage = ""
-	}
+	nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"provinces"}, &page, &limit, numberRecords)
 	offset := limit * (page-1)
 
 	provinces, err := provinceModel.FindAllProvince(limit, offset)
@@ -437,19 +417,8 @@ func GetCitiesByProvinceId(c *gin.Context) {
 		})
 		return
 	} else if isThere {
-		if page < 0 {
-			page = 1
-		}
-
-		if limit < 0 {
-			limit = 10
-		} else if limit > 25 {
-			limit = 25
-		}
-
 		cityModel := model.City{}
-		numberRecordsCity := 0
-		numberRecordsCity, err =  cityModel.GetNumberRecordsByProvinceId(provinceId)
+		numberRecordsCity, err :=  cityModel.GetNumberRecordsByProvinceId(provinceId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
 				StatusCode:	http.StatusInternalServerError,
@@ -459,27 +428,7 @@ func GetCitiesByProvinceId(c *gin.Context) {
 			return
 		}
 
-		totalPages := 0
-		if totalPages = numberRecordsCity / limit; numberRecordsCity % limit != 0 {
-			totalPages += 1
-		}
-
-		nextPage := fmt.Sprintf("api/provinces/%d/cities?page=%d&limit=%d", provinceId, page+1, limit)
-		prevPage := fmt.Sprintf("api/provinces/%d/cities?page=%d&limit=%d", provinceId, page-1, limit)
-
-		if (page+1) > totalPages {
-			nextPage = ""
-			page = 1
-		} else if (page-1) < 1 {
-			prevPage = ""
-			page = 1
-		}
-
-		if page >= 1 && limit >= numberRecordsCity {
-			page = 1
-			limit = numberRecordsCity
-			prevPage = ""
-		}
+		nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"provinces", strconv.Itoa(provinceId), "cities"}, &page, &limit, numberRecordsCity)
 		offset := limit * (page-1)
 
 		cities, err := provinceModel.FindAllCityByProvinceId(provinceId, limit, offset)

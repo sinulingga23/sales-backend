@@ -11,6 +11,7 @@ import (
 
 	"sales-backend/model"
 	"sales-backend/response"
+	"sales-backend/utility"
 	"github.com/gin-gonic/gin"
 )
 
@@ -380,18 +381,7 @@ func GetSubDistricts(c *gin.Context) {
 		return
 	}
 
-	if page < 0 {
-		page = 1
-	}
-
-	if limit < 0 {
-		limit = 10
-	} else if limit > 25 {
-		limit = 25
-	}
-
-	numberRecords := 0
-	numberRecords, err = subDistrictModel.GetNumberRecords()
+	numberRecords, err := subDistrictModel.GetNumberRecords()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
 			StatusCode:	http.StatusInternalServerError,
@@ -401,27 +391,7 @@ func GetSubDistricts(c *gin.Context) {
 		return
 	}
 
-	totalPages := 0
-	if totalPages = numberRecords / limit; numberRecords % limit != 0 {
-		totalPages += 1
-	}
-
-	nextPage := fmt.Sprintf("api/sub-districts?page=%d&limit=%d", page+1, limit)
-	prevPage := fmt.Sprintf("api/sub-districts?page=%d&limit=%d", page-1, limit)
-
-	if (page+1) > totalPages {
-		nextPage = ""
-		page = 1
-	} else if (page-1) < 1 {
-		prevPage = ""
-		page = 1
-	}
-
-	if page >= 1 && limit >= numberRecords {
-		page = 1
-		limit = numberRecords
-		prevPage = ""
-	}
+	nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"sub-districts"}, &page, &limit, numberRecords)
 	offset := limit * (page-1)
 
 	subDistricts, err := subDistrictModel.FindAllSubDistrict(limit, offset)

@@ -10,6 +10,7 @@ import (
 
 	"sales-backend/model"
 	"sales-backend/response"
+	"sales-backend/utility"
 	"github.com/gin-gonic/gin"
 )
 
@@ -376,18 +377,7 @@ func GetCities(c *gin.Context) {
 		return
 	}
 
-	if page < 0 {
-		page = 1
-	}
-
-	if limit < 0 {
-		limit = 10
-	} else if limit > 25 {
-		limit = 25
-	}
-
-	numberRecords := 0
-	numberRecords, err = cityModel.GetNumberRecords()
+	numberRecords, err := cityModel.GetNumberRecords()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
 			StatusCode:	http.StatusInternalServerError,
@@ -397,27 +387,7 @@ func GetCities(c *gin.Context) {
 		return
 	}
 
-	totalPages := 0
-	if totalPages = numberRecords / limit; numberRecords % limit != 0 {
-		totalPages += 1
-	}
-
-	nextPage := fmt.Sprintf("api/cities?page=%d&limit=%d", page+1, limit)
-	prevPage := fmt.Sprintf("api/cities?page=%d&limit=%d", page-1, limit)
-
-	if (page+1) > totalPages {
-		nextPage = ""
-		page = 1
-	} else if (page-1) < 1 {
-		prevPage = ""
-		page =1
-	}
-
-	if page >= 1 && limit >= numberRecords {
-		page = 1
-		limit = numberRecords
-		prevPage = ""
-	}
+	nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"cities"}, &page, &limit, numberRecords)
 	offset := limit * (page-1)
 
 	cities, err := cityModel.FindAllCity(limit, offset)
@@ -431,7 +401,7 @@ func GetCities(c *gin.Context) {
 	}
 
 	if len(cities) != 0 {
-		c.JSON(http.StatusOK, response.ResponseCitiesByProvinceId {
+		c.JSON(http.StatusOK, response.ResponseCities {
 			StatusCode:	http.StatusOK,
 			Message:	"Success to get the cities",
 			Cities:		cities,
@@ -515,19 +485,8 @@ func GetSubDistrictsByCityId(c *gin.Context) {
 		})
 		return
 	} else if isThere {
-		if page < 0 {
-			page = 1
-		}
-
-		if limit < 0 {
-			limit = 10
-		} else if limit > 25 {
-			limit = 25
-		}
-
 		subDistrictModel := model.SubDistrict{}
-		numberRecordsSubDistrict := 0
-		numberRecordsSubDistrict, err = subDistrictModel.GetNumberRecordsByCityId(cityId)
+		numberRecordsSubDistrict, err := subDistrictModel.GetNumberRecordsByCityId(cityId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
 				StatusCode:	http.StatusInternalServerError,
@@ -537,27 +496,7 @@ func GetSubDistrictsByCityId(c *gin.Context) {
 			return
 		}
 
-		totalPages := 0
-		if totalPages = numberRecordsSubDistrict / limit; numberRecordsSubDistrict % limit != 0 {
-			totalPages += 1
-		}
-
-		nextPage := fmt.Sprintf("api/cities/%d/sub-districts?page=%d&limit=%d", cityId, page+1, limit)
-		prevPage := fmt.Sprintf("api/cities/%d/sub-districts?page=%d&limit=%d", cityId, page-1, limit)
-
-		if (page+1) > totalPages {
-			nextPage = ""
-			page = 1
-		} else if (page-1) < 1 {
-			prevPage = ""
-			page = 1
-		}
-
-		if page >= 1 && limit >= numberRecordsSubDistrict {
-			page = 1
-			limit = numberRecordsSubDistrict
-			prevPage = ""
-		}
+		nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"provinces", strconv.Itoa(cityId), "cities"}, &page, &limit, numberRecordsSubDistrict)
 		offset := limit * (page-1)
 
 		subDistricts, err := cityModel.FindAllSubDistrictByCityId(cityId, limit, offset)
