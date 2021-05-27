@@ -144,64 +144,33 @@ func (p *Product) UpdateProductById(productId string) (*Product, error) {
 	}
 	defer db.Close()
 
-	if p.ProductId != productId {
-		return &Product{}, errors.New("Somethings wrong!")
-	}
-
-	currentProduct := &Product{}
-	err = db.QueryRow("SELECT product_id, category_product_id, name, unit, price, stock, created_at, updated_at FROM product WHERE product_id = ?", productId).
-		Scan(&currentProduct.ProductId, &currentProduct.CategoryProductId, &currentProduct.Name, &currentProduct.Unit, &currentProduct.Price, &currentProduct.Stock, &currentProduct.Audit.CreatedAt, &currentProduct.Audit.UpdatedAt)
-	if err != nil {
-		log.Printf("%s", err)
-		return &Product{}, errors.New("Somethings wrong!")
-	}
-
-	// For persistent & valid data, ensure the primary key and the current stock of product
-	// from the database is same with stock from request of client.
-	if (currentProduct.ProductId != p.ProductId && currentProduct.Stock != currentProduct.Stock) {
-		return &Product{}, errors.New("Somethings wrong!")
-	}
-
-	if p.AddStock < 0 || p.Price < 0 {
-		return &Product{}, errors.New("Somethings wrong!")
-	}
-
-	currentProduct.ProductId = p.ProductId
-	currentProduct.CategoryProductId = p.CategoryProductId
-	currentProduct.Name = p.Name
-	currentProduct.Unit = p.Unit
-	currentProduct.Price = p.Price
-	currentProduct.Stock = currentProduct.Stock + p.AddStock
-	currentProduct.Audit.CreatedAt = p.Audit.CreatedAt
-	currentProduct.Audit.UpdatedAt = p.Audit.UpdatedAt
-
-	result, err := db.Exec("UPDATE product SET product_id = ?, category_product_id = ?, name = ?, unit = ?, price = ?, stock = ?, created_at = ?, upddated_at = ? WHERE product_id = ?",
-		currentProduct.ProductId,
-		currentProduct.CategoryProductId,
-		currentProduct.Name,
-		currentProduct.Unit,
-		currentProduct.Price,
-		currentProduct.Stock,
-		currentProduct.Audit.CreatedAt,
-		currentProduct.Audit.UpdatedAt,
+	result, err := db.Exec("UPDATE product SET product_id = ?, category_product_id = ?, name = ?, unit = ?, price = ?, stock = ?, created_at = ?, updated_at = ? WHERE product_id = ?",
+		p.ProductId,
+		p.CategoryProductId,
+		p.Name,
+		p.Unit,
+		p.Price,
+		p.Stock,
+		p.Audit.CreatedAt,
+		p.Audit.UpdatedAt,
 		productId)
 	if err != nil {
-		log.Printf("%s", err)
+		log.Printf("189: %s", err)
 		return &Product{}, errors.New("Somethings wrong!")
 	}
 
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		log.Printf("%s", err)
+		log.Printf("195: %s", err)
 		return &Product{}, errors.New("Somethings wrong!")
 	}
 
 	if rowsAffected != 1 {
-		log.Printf("%s", err)
+		log.Printf("200 Err")
 		return &Product{}, errors.New("Somethings wrong!")
 	}
 
-	return currentProduct, nil
+	return p, nil
 }
 
 func (p *Product) DeleteProductById(productId string) (bool, error) {

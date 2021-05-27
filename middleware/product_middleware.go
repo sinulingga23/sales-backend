@@ -41,7 +41,7 @@ func ValidateProduct() gin.HandlerFunc {
 		listInvalid := make(map[string]string)
 
 		// validate the CategoryProductId field
-		if len(strings.Trim(" ",requestProduct.CategoryProductId)) == 0 {
+		if len(strings.Trim(requestProduct.CategoryProductId, " ")) == 0 {
 			isThereInvalid = true
 			listInvalid["err_category_product_id"] = "The CategoryProductId can't be empty"
 		} else {
@@ -63,13 +63,13 @@ func ValidateProduct() gin.HandlerFunc {
 		}
 
 		// validate the Name field
-		if requestProduct.Name == "" {
+		if len(strings.Trim(requestProduct.Name, " ")) == 0 {
 			isThereInvalid = true
 			listInvalid["err_name"] = "The Name can't be empty"
 		}
 
 		// validtae the Unit field
-		if len(strings.Trim(" ", requestProduct.Unit)) == 0 {
+		if len(strings.Trim(requestProduct.Unit, " ")) == 0 {
 			isThereInvalid = true
 			listInvalid["err_unit"] = "The Unit can't be empty"
 		}
@@ -84,6 +84,12 @@ func ValidateProduct() gin.HandlerFunc {
 		if requestProduct.Stock < 0 {
 			isThereInvalid = true
 			listInvalid["err_stock"] = "The Stock can't be negative"
+		}
+
+		// validate the AddStock field
+		if requestProduct.AddStock < 0 {
+			isThereInvalid = true
+			listInvalid["err_add_stock"] = "The AddStock can't be negative"
 		}
 
 		if isThereInvalid {
