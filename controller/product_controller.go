@@ -6,9 +6,11 @@ import (
 	"time"
 	"net/http"
 	"strings"
+	"strconv"
 
 	"sales-backend/model"
 	"sales-backend/response"
+	"sales-backend/utility"
 	"github.com/gin-gonic/gin"
 )
 
@@ -221,4 +223,142 @@ func UpdateProductById(c *gin.Context) {
 		Message:	"Somethings wrong!",
 	})
 	return
+}
+
+func DeleteProductById(c *gin.Context) {
+	productId := c.Param("productId")
+
+	if len(strings.Trim(productId, " ")) == 0 {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"ProductId can't be empty",
+		})
+		return
+	}
+
+	productModel := model.Product{}
+	isThere, err := productModel.IsProductExistsById(productId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"The server can't handle the request",
+			Errors:		fmt.Sprintf("%s", err),
+		})
+		return
+	}
+
+	if !isThere {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The product is not exists.",
+		})
+		return
+	} else if isThere {
+		isSuccess, err :=  productModel.DeleteProductById(productId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+				StatusCode:	http.StatusInternalServerError,
+				Message:	"The server can't handle the request",
+				Errors:		fmt.Sprintf("%s", err),
+			})
+			return
+		}
+
+		if !isSuccess {
+			c.JSON(http.StatusNotFound, response.ResponseGeneric {
+				StatusCode:	http.StatusNotFound,
+				Message:	"The category is not exists.",
+			})
+			return
+		} else if isSuccess {
+			c.JSON(http.StatusOK, response.ResponseGeneric {
+				StatusCode:	http.StatusOK,
+				Message:	"Success to delete the product",
+			})
+			return
+		}
+	}
+
+	c.JSON(http.StatusInternalServerError, response.ResponseGeneric {
+		StatusCode:	http.StatusInternalServerError,
+		Message:	"Somethings wrong!",
+	})
+	return
+}
+
+func GetProducts(c *gin.Context) {
+	requestPage := c.DefaultQuery("page", "1")
+	requestLimit := c.DefaultQuery("limit", "10")
+	productModel := model.Product{}
+
+	page := 0
+	page, err := strconv.Atoi(requestPage)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"The parameters invalid",
+			Errors:		"Not Valid",
+		})
+		return
+	}
+
+	limit := 0
+	limit, err = strconv.Atoi(requestLimit)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.ResponseErrors {
+			StatusCode:	http.StatusBadRequest,
+			Message:	"The parameters invalid",
+			Errors:		"Not Valid",
+		})
+		return
+	}
+
+	numberRecords, err := productModel.GetNumberRecords()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message:	"Somethings wrong!",
+			Errors:		"Internal Error",
+		})
+		return
+	}
+
+	nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"products"}, &page, &limit, numberRecords)
+	offset := limit * (page-1)
+
+	products, err := productModel.FindAllProduct(limit, offset)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors {
+			StatusCode:	http.StatusInternalServerError,
+			Message: 	"Somethings wrong!",
+			Errors: 	fmt.Sprintf("%s", err),
+		})
+		return
+	}
+
+	for i := 0; i<len(products); i++ {
+		log.Printf("product-%d: %v\n", i, *products[i])
+	}
+
+	if  len(products) != 0 {
+		c.JSON(http.StatusOK, response.ResponseProducts {
+			StatusCode:	http.StatusOK,
+			Message:	"Success to get the products",
+			Products:	products,
+			InfoPagination:	response.InfoPagination {
+				CurrentPage:	page,
+				RowsEachPage:	limit,
+				TotalPages:	totalPages,
+			},
+			NextPage:	nextPage,
+			PrevPage:	prevPage,
+		})
+		return
+	} else {
+		c.JSON(http.StatusNotFound, response.ResponseGeneric {
+			StatusCode:	http.StatusNotFound,
+			Message:	"The products is empty",
+		})
+		return
+	}
 }

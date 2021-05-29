@@ -218,7 +218,7 @@ func (p *Product) FindAllProduct(limit int, offset int) ([]*Product, error){
 	result := []*Product{}
 	for rows.Next() {
 		each := &Product{}
-		err = rows.Scan(&p.ProductId, &p.CategoryProductId, &p.Name, &p.Unit, &p.Price, &p.Stock, &p.Audit.CreatedAt, &p.Audit.UpdatedAt)
+		err = rows.Scan(&each.ProductId, &each.CategoryProductId, &each.Name, &each.Unit, &each.Price, &each.Stock, &each.Audit.CreatedAt, &each.Audit.UpdatedAt)
 		if err != nil {
 			return []*Product{}, err
 		}

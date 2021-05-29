@@ -45,7 +45,7 @@ func GetPaginateURL(paths []string, page *int, limit *int, numberRecords int) (s
 		nextPage = ""
 		tempPage = totalPages
 	} else if (tempPage-1) < 1 {
-		prevPage = ""
+		nextPage = ""
 		tempPage = 1
 	}
 

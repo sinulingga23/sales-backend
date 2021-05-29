@@ -43,6 +43,8 @@ func RunServer() {
 	router.GET("api/products/:productId", GetProductById)
 	router.POST("api/products", middleware.ValidateProduct(), CreateProduct)
 	router.PUT("api/products/:productId", middleware.ValidateProduct(), UpdateProductById)
+	router.DELETE("api/products/:productId", DeleteProductById)
+	router.GET("api/products", GetProducts)
 
 	router.Run(":8080")
 }

@@ -93,6 +93,9 @@ type ResponseProducts struct {
 	StatusCode	int			`json:"statusCode"`
 	Message		string			`json:"message"`
 	Products	[]*model.Product	`json:"products"`
+	InfoPagination	InfoPagination		`json:"infoPaginattion"`
+	NextPage	string			`json:"nextPage"`
+	PrevPage	string			`json:"prevPage"`
 }
 
 type ResponseProductsByCategoryProductId struct {
