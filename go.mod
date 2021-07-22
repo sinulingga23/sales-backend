@@ -13,7 +13,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/stretchr/testify v1.7.0
 	github.com/ugorji/go v1.2.4 // indirect
-	golang.org/x/crypto v0.0.0-20210317152858-513c2a44f670 // indirect
+	golang.org/x/crypto v0.0.0-20210317152858-513c2a44f670
 	golang.org/x/sys v0.0.0-20210319071255-635bc2c9138d // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

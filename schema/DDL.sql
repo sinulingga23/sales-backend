@@ -183,3 +183,35 @@ ALTER TABLE address DROP FOREIGN KEY `address_sub_district_id_foreign`;
 ALTER TABLE sub_district MODIFY `sub_district_id` INT NOT NULL AUTO_INCREMENT;
 ALTER TABLE address ADD CONSTRAINT `address_sub_district_id_foreign` FOREIGN KEY(sub_district_id) REFERENCES sub_district(sub_district_id) ON UPDATE CASCADE ON DELETE NO ACTION;
 UNLOCK TABLES;
+
+LOCK TABLE permissions WRITE;
+ALTER TABLE permissions DROP FOREIGN KEY `permissions_role_id_foreign`;
+UNLOCK TABLES;
+
+LOCK TABLE users_roles WRITE;
+ALTER TABLE users_roles DROP FOREIGN KEY `users_roles_role_id_foreign`;
+UNLOCK TABLES;
+
+LOCK TABLE roles WRITE;
+ALTER TABLE roles MODIFY `role_id` INT NOT NULL AUTO_INCREMENT;
+UNLOCK TABLES;
+
+LOCK TABLE permissions WRITE;
+ALTER TABLE permissions ADD CONSTRAINT `permissions_role_id_foreign` FOREIGN KEY(role_id) REFERENCES roles(role_id) ON UPDATE CASCADE ON DELETE CASCADE;
+UNLOCK TABLES;
+
+LOCK TABLE users_roles WRITE;
+ALTER TABLE users_roles ADD CONSTRAINT `users_roles_role_id_foreign` FOREIGN KEY(role_id) REFERENCES roles(role_id) ON UPDATE CASCADE ON DELETE CASCADE;
+UNLOCK TABLES;
+
+LOCK TABLE users WRITE;
+ALTER TABLE users DROP FOREIGN KEY `customer_address_id`;
+UNLOCK TABLES;
+
+LOCK TABLE address WRITE;
+ALTER TABLE address MODIFY `address_id` INT NOT NULL AUTO_INCREMENT;
+UNLOCK TABLES;
+
+LOCK TABLE users WRITE;
+ALTER TABLE users ADD CONSTRAINT `users_address_id_foreign` FOREIGN KEY(address_id) REFERENCES address(address_id) ON UPDATE CASCADE ON DELETE CASCADE;
+UNLOCK TABLES;

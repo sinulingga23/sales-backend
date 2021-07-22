@@ -132,3 +132,9 @@ type ResponseSubDistrictsByCityId struct {
 	NextPage	string 			`json:"nextPage"`
 	PrevPage	string 			`json:"prevPage"`
 }
+
+type ResponseUser struct {
+	StatusCode	int 		`json:"statusCode"`
+	Message		string		`json:"message"`
+	User		model.User	`json:"user"`
+}

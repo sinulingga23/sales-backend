@@ -46,5 +46,9 @@ func RunServer() {
 	router.DELETE("api/products/:productId", DeleteProductById)
 	router.GET("api/products", GetProducts)
 
+	// users
+	router.GET("api/users/:userId", GetUserById)
+	router.POST("api/users", middleware.ValidateUser(), CreateUser)
+
 	router.Run(":8080")
 }
