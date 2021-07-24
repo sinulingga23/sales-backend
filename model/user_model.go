@@ -152,7 +152,8 @@ func (uR *UserRegister) SaveUser() (*User, error) {
 		log.Printf("%s", err)
 	}
 
-	hashedPassword, err := utility.HashPassword(uR.Password)
+	loginModel := Login{}
+	hashedPassword, err := loginModel.EncryptPassword(uR.Password)
 	if err != nil {
 		return &User{}, err
 	}
@@ -265,4 +266,36 @@ func (uR *UserRegister) FindUserById(userId string) (*User, error) {
 	}
 
 	return currentUser, nil
+}
+
+func (uR *UserRegister) GetRoleIdByEmail(email string) (int, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return 0, err
+	}
+	defer db.Close()
+
+	tx, err := db.Begin()
+
+	userId := ""
+	err = tx.QueryRow("SELECT user_id FROM users WHERE email = ?", email).Scan(&userId)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	roleId := 0
+	err = tx.QueryRow("SELECT role_id FROM users_roles WHERE user_id =?", userId).Scan(&roleId)
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return 0, err
+	}
+
+	return roleId, nil
 }

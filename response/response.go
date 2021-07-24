@@ -138,3 +138,8 @@ type ResponseUser struct {
 	Message		string		`json:"message"`
 	User		model.User	`json:"user"`
 }
+
+type ResonseJWTToken struct {
+	StatusCode	int 	`json:"statusCode"`
+	Token		string	`json:"token"`
+}

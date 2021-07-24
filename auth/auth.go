@@ -7,9 +7,12 @@ import (
 	"strings"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/golang-jwt/jwt"
 )
+
+// TODO: Create function ExtractElapsedTime()
 
 func CreateToken(email string, roleId int) (string, error) {
 	if len(os.Getenv("JWT_SECRET_KEY")) == 0 {
@@ -22,7 +25,7 @@ func CreateToken(email string, roleId int) (string, error) {
 		RoleId	int
 	}{
 		jwt.StandardClaims{
-			ExpiresAt: 	3600 * 24 * 30,
+			ExpiresAt: 	time.Now().Add(time.Hour * 1).Unix(),
 			Issuer:		email,
 		},
 		email,
@@ -49,7 +52,7 @@ func ExtractToken(r *http.Request) string {
 
 func IsValidToken(r *http.Request) (bool, error) {
 	var bearerToken string
-	if bearerToken = ExtractToken(r); bearerToken != "" {
+	if bearerToken = ExtractToken(r); bearerToken == "" {
 		return false, errors.New("Token is invalid")
 	}
 	_, err := jwt.Parse(bearerToken, func(token *jwt.Token) (interface{}, error) {
@@ -114,5 +117,3 @@ func ExtractTokenRoleId(r *http.Request) (int, error) {
 
 	return 0, errors.New("Somethings wrong!")
 }
-
-
