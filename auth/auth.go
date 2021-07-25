@@ -70,7 +70,7 @@ func IsValidToken(r *http.Request) (bool, error) {
 
 func ExtractTokenEmail(r *http.Request) (string, error) {
 	var bearerToken string
-	if bearerToken = ExtractToken(r); bearerToken != "" {
+	if bearerToken = ExtractToken(r); bearerToken == "" {
 		return "", errors.New("Token is invalid")
 	}
 	token, err := jwt.Parse(bearerToken, func(token *jwt.Token) (interface{}, error) {
@@ -93,7 +93,7 @@ func ExtractTokenEmail(r *http.Request) (string, error) {
 
 func ExtractTokenRoleId(r *http.Request) (int, error) {
 	var bearerToken string
-	if bearerToken = ExtractToken(r); bearerToken != "" {
+	if bearerToken = ExtractToken(r); bearerToken == "" {
 		return 0, errors.New("Token is invalid")
 	}
 	token, err := jwt.Parse(bearerToken, func(token *jwt.Token) (interface{}, error) {
@@ -108,7 +108,7 @@ func ExtractTokenRoleId(r *http.Request) (int, error) {
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
-		roleId, err := strconv.ParseInt(fmt.Sprintf("%0.f", claims["role_id"]), 10, 32)
+		roleId, err := strconv.ParseInt(fmt.Sprintf("%0.f", claims["RoleId"]), 10, 32)
 		if err != nil {
 			return 0, err
 		}

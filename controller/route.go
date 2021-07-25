@@ -18,25 +18,25 @@ func RunServer() {
 
 	// provinces
 	router.GET("api/provinces/:provinceId", GetProvinceById)
-	router.POST("api/provinces", middleware.ValidateTokenMiddleware(), CreateProvince)
-	router.PUT("api/provinces/:provinceId", middleware.ValidateTokenMiddleware(), UpdateProvinceById)
-	router.DELETE("api/provinces/:provinceId", middleware.ValidateTokenMiddleware(), DeleteProvinceById)
+	router.POST("api/provinces", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), CreateProvince)
+	router.PUT("api/provinces/:provinceId", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), UpdateProvinceById)
+	router.DELETE("api/provinces/:provinceId", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), DeleteProvinceById)
 	router.GET("api/provinces", GetProvinces)
 	router.GET("api/provinces/:provinceId/cities", GetCitiesByProvinceId)
 
 	// cities
 	router.GET("api/cities/:cityId", GetCityById)
-	router.POST("api/cities", middleware.ValidateTokenMiddleware(), CreateCity)
-	router.PUT("api/cities/:cityId", middleware.ValidateTokenMiddleware(), UpdateCityById)
-	router.DELETE("api/cities/:cityId", middleware.ValidateTokenMiddleware(), DeleteCityById)
+	router.POST("api/cities", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), CreateCity)
+	router.PUT("api/cities/:cityId", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), UpdateCityById)
+	router.DELETE("api/cities/:cityId", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), DeleteCityById)
 	router.GET("api/cities", GetCities)
 	router.GET("api/cities/:cityId/sub-districts", GetSubDistrictsByCityId)
 
 	// sub-districts
 	router.GET("api/sub-districts/:subDistrictId", GetSubDistrictById)
-	router.POST("api/sub-districts", middleware.ValidateTokenMiddleware(), CreateSubDistrict)
-	router.PUT("api/sub-districts/:subDistrictId", middleware.ValidateTokenMiddleware(), UpdateSubDistrictById)
-	router.DELETE("api/sub-districts/:subDistrictId", middleware.ValidateTokenMiddleware(), DeleteSubDistrictById)
+	router.POST("api/sub-districts", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), CreateSubDistrict)
+	router.PUT("api/sub-districts/:subDistrictId", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), UpdateSubDistrictById)
+	router.DELETE("api/sub-districts/:subDistrictId", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), DeleteSubDistrictById)
 	router.GET("api/sub-districts", GetSubDistricts)
 
 	// products
