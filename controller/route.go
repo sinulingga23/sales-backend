@@ -8,6 +8,9 @@ import (
 func RunServer() {
 	router := gin.Default()
 
+	// cors
+	router.Use(middleware.CORSMiddleware())
+
 	// category-products
 	router.GET("api/category-products/:categoryProductId", GetCategoryProductById)
 	router.POST("api/category-products", middleware.ValidateTokenMiddleware(), CreateCategoryProduct)
