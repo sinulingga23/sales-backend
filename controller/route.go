@@ -56,5 +56,8 @@ func RunServer() {
 	// login
 	router.POST("api/login", BasicAuth)
 
+	// roles
+	router.GET("api/roles/:roleId", GetRoleById)
+
 	router.Run(":8080")
 }

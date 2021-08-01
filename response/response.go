@@ -143,3 +143,9 @@ type ResonseJWTToken struct {
 	StatusCode	int 	`json:"statusCode"`
 	Token		string	`json:"token"`
 }
+
+type ResponseRole struct {
+	StatusCode	int 		`json:"statusCode"`
+	Message		string 		`json:"message"`
+	Role 		model.Role	`json:"role"`
+}
