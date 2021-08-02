@@ -21,7 +21,7 @@ func GetSubDistrictById(c *gin.Context) {
 	subDistrictId, err := strconv.Atoi(c.Param("subDistrictId"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors {
-			StatusCode:	http.StatusOK,
+			StatusCode:	http.StatusBadRequest,
 			Message:	"Invalid",
 			Errors:		"Bad Request",
 		})
