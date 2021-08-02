@@ -47,7 +47,27 @@ func (r *Role) GetRoleById(roleId int) (string, error) {
 	return role, nil
 }
 
-func (r *Role) CreateRole(role string) (*Role, error) {
+func (r *Role) FindRoleById(roleId int) (*Role, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return &Role{}, err
+	}
+	defer db.Close()
+
+	err = db.QueryRow("SELECT role_id, role_name, created_at, updated_at FROM roles WHERE role_id = ?", roleId).
+		Scan(&r.RoleId, &r.Role, &r.Audit.CreatedAt, &r.Audit.UpdatedAt)
+	if err != nil {
+		return &Role{}, err
+	}
+
+	if r == (&Role{}) {
+		return &Role{}, err
+	}
+
+	return r, nil
+}
+
+func (r *Role) SaveRole() (*Role, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return &Role{}, err
@@ -68,7 +88,7 @@ func (r *Role) CreateRole(role string) (*Role, error) {
 	return r, nil
 }
 
-func (r *Role) UpdateRoleById(roleId string) (*Role, error) {
+func (r *Role) UpdateRoleById(roleId int) (*Role, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return &Role{}, err
@@ -78,7 +98,8 @@ func (r *Role) UpdateRoleById(roleId string) (*Role, error) {
 	result, err := db.Exec("UPDATE roles SET role_name = ?, created_at = ?, updated_at = ? WHERE role_id = ?",
 		r.Role,
 		r.Audit.CreatedAt,
-		r.Audit.UpdatedAt)
+		r.Audit.UpdatedAt,
+		roleId)
 	if err != nil {
 		return &Role{}, err
 	}
@@ -95,7 +116,7 @@ func (r *Role) UpdateRoleById(roleId string) (*Role, error) {
 	return r, nil
 }
 
-func (r *Role) DeleteRoleBydI(roleId int) (bool, error) {
+func (r *Role) DeleteRoleById(roleId int) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, err
@@ -148,4 +169,20 @@ func (r *Role) FindAllRole(limit int, offset int) ([]*Role, error) {
 	}
 
 	return result, nil
+}
+
+func (r *Role) GetNumberRecords() (int, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return 0, err
+	}
+	defer db.Close()
+
+	numberRecords := 0
+	err = db.QueryRow("SELECT COUNT(role_id) FROM roles").Scan(&numberRecords)
+	if err != nil {
+		return 0, err
+	}
+
+	return numberRecords, nil
 }

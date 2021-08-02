@@ -149,3 +149,12 @@ type ResponseRole struct {
 	Message		string 		`json:"message"`
 	Role 		model.Role	`json:"role"`
 }
+
+type ResponseRoles struct {
+	StatusCode	int 		`json:"statusCode"`
+	Message		string		`json:"message"`
+	Roles		[]*model.Role	`json:"roles"`
+	InfoPagination	InfoPagination	`json:"infoPagination"`
+	NextPage	string 		`json:"nextPage"`
+	PrevPage	string 		`json:"prevPage"`
+}
