@@ -58,6 +58,10 @@ func RunServer() {
 
 	// roles
 	router.GET("api/roles/:roleId", GetRoleById)
+	router.POST("api/roles", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), CreateRole)
+	router.PUT("api/roles/:roleId", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), UpdateRole)
+	router.DELETE("api/roles/:roleId", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), DeleteRole)
+	router.GET("api/roles", GetRoles)
 
 	router.Run(":8080")
 }
