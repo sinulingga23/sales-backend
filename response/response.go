@@ -158,3 +158,9 @@ type ResponseRoles struct {
 	NextPage	string 		`json:"nextPage"`
 	PrevPage	string 		`json:"prevPage"`
 }
+
+type ResponsePermision struct {
+	StatusCode	int 		`json:"statusCode"`
+	Message		string 		`json:"message"`
+	Permission	model.Permission `json:"permission"`
+}
