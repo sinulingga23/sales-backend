@@ -9,7 +9,7 @@ import (
 type Permission struct {
 	PermissionId	int 	`json:"permissionId"`
 	RoleId		int 	`json:"roleId"`
-	Permission	string	`json:"permisson"`
+	Permission	string	`json:"permission"`
 	Audit		Audit	`json:"audit"`
 }
 
@@ -21,7 +21,7 @@ func (p *Permission) IsPermissionExistsById(permissionId int) (bool, error) {
 	defer db.Close()
 
 	check := 0
-	err = db.QueryRow("SELECT COUNT(permisson_id) FROM permissions WHERE permission_id = ?", permissionId).Scan(&check)
+	err = db.QueryRow("SELECT COUNT(permission_id) FROM permissions WHERE permission_id = ?", permissionId).Scan(&check)
 	if err != nil {
 		return false, err
 	}
@@ -84,7 +84,7 @@ func (p *Permission) UpdatePermissionById(permissionId int) (*Permission, error)
 	}
 	defer db.Close()
 
-	result, err := db.Exec("UPDATE permissons SET role_id = ?, permisson_name = ?, created_at = ?, updated_at = ? WHERE permision_id = ?",
+	result, err := db.Exec("UPDATE permissions SET role_id = ?, permission_name = ?, created_at = ?, updated_at = ? WHERE permision_id = ?",
 		p.RoleId,
 		p.Permission,
 		p.Audit.CreatedAt,
@@ -138,7 +138,7 @@ func (p *Permission) FindAllPermission(limit int, offset int) ([]*Permission, er
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT permission_id, role_id, permisson_name, created_at, updated_at FROM permission LIMIT ? OFFSET ?", limit, offset)
+	rows, err := db.Query("SELECT permission_id, role_id, permission_name, created_at, updated_at FROM permission LIMIT ? OFFSET ?", limit, offset)
 	if err != nil {
 		return []*Permission{}, errors.New("Somethings wrong!")
 	}
