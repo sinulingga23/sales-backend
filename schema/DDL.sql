@@ -23,6 +23,8 @@ CREATE TABLE `product` (
   ON UPDATE CASCADE ON DELETE NO ACTION
 );
 
+
+
 CREATE TABLE `province` (
   province_id INT NOT NULL,
   province VARCHAR(150) NOT NULL,
