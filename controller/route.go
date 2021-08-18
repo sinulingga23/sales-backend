@@ -67,5 +67,9 @@ func RunServer() {
 	router.GET("api/permissions/:permissionId", GetPermisisonById)
 	router.POST("api/permissions", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), CreatePermission)
 
+	// transaction
+	router.GET("/api/transactions/:transactionId", GetTransactionById)
+	router.POST("/api/transactions", middleware.ValidateTokenMiddleware(), CreateTransaction)
+
 	router.Run(":8080")
 }
