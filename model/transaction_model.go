@@ -15,7 +15,7 @@ type Transaction struct {
 	Audit		Audit 	`json:"audit"`
 }
 
-func (t *Transaction) IsTransactionExistsById(transactionId int) (bool, error) {
+func (t *Transaction) IsTransactionExistsById(transactionId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, errors.New("Somethings wrong!")
@@ -56,12 +56,22 @@ func (t *Transaction) SaveTransaction() (*Transaction, error) {
 	}
 	number += 1
 	transactionId += fmt.Sprintf("%d", number)
-
 	t.TransactionId = transactionId
+
+	_, err = db.Exec("INSERT INTO transaction (transaction_id, customer_id, employee_id, date, created_at) VALUES (?,?,?,?,?)",
+		t.TransactionId,
+		t.CustomerId,
+		t.EmployeeId,
+		t.Date,
+		t.Audit.CreatedAt)
+	if err != nil {
+		return &Transaction{}, errors.New("Somethings wrong!")
+	}
+
 	return t, nil
 }
 
-func (t *Transaction) FindTransactionById(transactionId int) (*Transaction, error) {
+func (t *Transaction) FindTransactionById(transactionId string) (*Transaction, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return &Transaction{}, errors.New("Somethings wrong!")
@@ -81,7 +91,7 @@ func (t *Transaction) FindTransactionById(transactionId int) (*Transaction, erro
 	return t, nil
 }
 
-func (t *Transaction) UpdateTransactionById(transactionId int) (*Transaction, error) {
+func (t *Transaction) UpdateTransactionById(transactionId string) (*Transaction, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return &Transaction{}, errors.New("Somethings wrong!")
@@ -109,4 +119,80 @@ func (t *Transaction) UpdateTransactionById(transactionId int) (*Transaction, er
 	}
 
 	return t, nil
+}
+
+func (t *Transaction) DeleteTransactionByid(transactionId string) (bool, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return false, errors.New("Somethings wrong!")
+	}
+	defer db.Close()
+
+	tx, err := db.Begin()
+	if err != nil {
+		tx.Rollback()
+		return false, errors.New("Somethings wrong!")
+	}
+
+	check := 0
+	err = tx.QueryRow("SELECT COUNT(transaction_detail_id) FROM transaction_detail WHERE transaction_id = ?", transactionId).Scan(&check)
+	if err != nil {
+		tx.Rollback()
+		return false, errors.New("Somethings wrong!")
+	}
+
+	if check >= 1 {
+		tx.Rollback()
+		return false, errors.New("Can't delete the transaction because have details!")
+	}
+
+	result, err := tx.Exec("DELETE FROM transaction WHERE transaction_id = ?", transactionId)
+	if err != nil {
+		tx.Rollback()
+		return false, errors.New("Somethings wrong!")
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		tx.Rollback()
+		return false, errors.New("Somethings wrong!")
+	}
+
+	if rowsAffected != 1 {
+		tx.Rollback()
+		return false, errors.New("Somethings wrong!")
+	}
+
+	return true, nil
+}
+
+func (t *Transaction) FindAllTransaction(limit int, offset int) ([]*Transaction, error) {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		return []*Transaction{}, errors.New("Somethings wrong!")
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT transaction_id, customer_id, employee_id, date, created_at, updated_at FROM transaction LIMIT ? OFFSET ?", limit, offset)
+	if err != nil {
+		return []*Transaction{}, errors.New("Somethings wrong!")
+	}
+	defer db.Close()
+
+	result := []*Transaction{}
+	for rows.Next() {
+		each := &Transaction{}
+		err = rows.Scan(&each.TransactionId, &each.CustomerId, &each.EmployeeId, &each.Date, &each.Audit.CreatedAt, &each.Audit.UpdatedAt)
+		if err != nil {
+			return []*Transaction{}, errors.New("Somethings wrong!")
+		}
+
+		result = append(result, each)
+	}
+
+	if err = rows.Err(); err != nil {
+		return []*Transaction{}, errors.New("Somethings wrong!")
+	}
+
+	return result, nil
 }
