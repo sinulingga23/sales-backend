@@ -160,7 +160,7 @@ ALTER TABLE province
 MODIFY `province_id` INT NOT NULL AUTO_INCREMENT;
 
 LOCK TABLE city WRITE;
-LTER TABLE city ADD CONSTRAINT `city_province_id_foreign` FOREIGN KEY(province_id)
+ALTER TABLE city ADD CONSTRAINT `city_province_id_foreign` FOREIGN KEY(province_id)
 REFERENCES province(province_id)
 ON UPDATE CASCADE ON DELETE NO ACTION;
 
