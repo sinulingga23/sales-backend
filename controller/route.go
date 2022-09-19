@@ -71,5 +71,5 @@ func RunServer() {
 	router.GET("/api/transactions/:transactionId", GetTransactionById)
 	router.POST("/api/transactions", middleware.ValidateTokenMiddleware(), CreateTransaction)
 
-	router.Run(":8080")
+	router.Run(":8085")
 }
