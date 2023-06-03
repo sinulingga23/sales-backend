@@ -130,7 +130,7 @@ func (p *Product) FindProductById(productId string) (*Product, error) {
 	}
 
 	if p == (&Product{}) {
-		return &Product{}, errors.New(fmt.Sprintf("Can't find Product with id: %d", productId))
+		return &Product{}, errors.New(fmt.Sprintf("Can't find Product with id: %v", productId))
 	}
 
 	return p, nil

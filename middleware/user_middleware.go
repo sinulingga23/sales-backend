@@ -26,7 +26,7 @@ func ValidateUser() gin.HandlerFunc {
 
 		err := c.Bind(&requestUserRegister)
 		if err != nil {
-			log.Print("%s", err)
+			log.Printf("%s", err)
 			c.JSON(http.StatusBadRequest, response.ResponseErrors{
 				StatusCode: http.StatusBadRequest,
 				Message:    "Invalid Request",
@@ -76,7 +76,7 @@ func ValidateUser() gin.HandlerFunc {
 			var provinceId int = requestUserRegister.ProvinceId
 			isThereProvinceId, err := provinceModel.IsProvinceExistsById(provinceId)
 			if err != nil {
-				log.Print("%s", err)
+				log.Printf("%s", err)
 				c.JSON(http.StatusInternalServerError, response.ResponseErrors{
 					StatusCode: http.StatusInternalServerError,
 					Message:    "The server can't handle the request",

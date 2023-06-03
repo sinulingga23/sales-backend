@@ -16,7 +16,7 @@ type User struct {
 	LastName    string `json:"lastName"`
 	Gender      string `json:"gender"`
 	Address     string `json:"address"`
-	Email       string `json:"address"`
+	Email       string `json:"email"`
 	PhoneNumber string `json:"phoneNumber"`
 	Audit       Audit  `json:"audit"`
 }
