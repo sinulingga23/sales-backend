@@ -7,9 +7,9 @@ import (
 )
 
 type Role struct {
-	RoleId	int 	`json:"roleId"`
-	Role	string 	`json:"role"`
-	Audit	Audit	`json:"audit"`
+	RoleId int    `json:"roleId"`
+	Role   string `json:"role"`
+	Audit  Audit  `json:"audit"`
 }
 
 func (r *Role) IsRoleExistsById(roleId int) (bool, error) {

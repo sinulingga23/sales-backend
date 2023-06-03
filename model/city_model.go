@@ -1,19 +1,18 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"log"
-	"errors"
 
 	"sales-backend/utility"
 )
 
-
 type City struct {
-	CityId		int	`json:"cityId"`
-	ProvinceId	int	`json:"provinceId"`
-	City		string	`json:"city"`
-	Audit		Audit	`json:"audit"`
+	CityId     int    `json:"cityId"`
+	ProvinceId int    `json:"provinceId"`
+	City       string `json:"city"`
+	Audit      Audit  `json:"audit"`
 }
 
 func (c *City) IsCityExistsById(cityId int) (bool, error) {
@@ -23,7 +22,7 @@ func (c *City) IsCityExistsById(cityId int) (bool, error) {
 	}
 	defer db.Close()
 
-	check := 0;
+	check := 0
 	err = db.QueryRow("SELECT COUNT(city_id) FROM city WHERE city_id = ?", cityId).Scan(&check)
 	if err != nil {
 		return false, errors.New("Somethings wrong!")
@@ -120,7 +119,7 @@ func (c *City) DeleteCityById(cityId int) (bool, error) {
 	defer db.Close()
 
 	result, err := db.Exec("DELETE FROM city WHERE city_id = ?", cityId)
-	if err != nil{
+	if err != nil {
 		return false, errors.New("Somethings wrong!")
 	}
 

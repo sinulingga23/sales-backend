@@ -11,14 +11,14 @@ const (
 )
 
 type Customer struct {
-	CustomerId 	string 	`json:"customerId"`
-	FirstName   	string 	`json:"firstName"`
-	LastName    	string 	`json:"lastName"`
-	Gender      	string 	`json:"gender"`
-	Address     	Address `json:"address"`
-	Email		string	`json:"email"`
-	PhoneNumber 	string 	`json:"phoneNumber"`
-	Audit      	Audit 	`json:"audit"`
+	CustomerId  string  `json:"customerId"`
+	FirstName   string  `json:"firstName"`
+	LastName    string  `json:"lastName"`
+	Gender      string  `json:"gender"`
+	Address     Address `json:"address"`
+	Email       string  `json:"email"`
+	PhoneNumber string  `json:"phoneNumber"`
+	Audit       Audit   `json:"audit"`
 }
 
 func (c *Customer) IsCustomerExsistById(customerId string) (bool, error) {
@@ -66,7 +66,6 @@ func (c *Customer) IsCustomerExsistById(customerId string) (bool, error) {
 		tx.Rollback()
 		return false, errors.New("Somethings wrong!")
 	}
-
 
 	if checkRole != 1 || role != CUSTOMER_ROLE {
 		tx.Rollback()

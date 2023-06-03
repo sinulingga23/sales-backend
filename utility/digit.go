@@ -1,6 +1,5 @@
 package utility
 
-
 func DigitsCount(number int) int {
 	count := 0
 	for number != 0 {

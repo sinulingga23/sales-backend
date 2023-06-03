@@ -1,12 +1,12 @@
 package modeltest
 
-
 import (
-	"log"
 	"fmt"
+	"log"
 	"testing"
 
 	"sales-backend/model"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -74,7 +74,6 @@ func TestIsCategoryProductExistsByIdById_NotExists(t *testing.T) {
 	assert.Equal(expectedMessageResult1, actualMessageResult1, "They should be equal")
 	assert.Equal(expectedMessageResult2, actualMessageResult2, "They should be equal")
 	assert.Equal(expectedMessageResult3, actualMessageResult3, "They should be equal")
-
 
 	assert.NotEqual(true, actualValueResult1, "They should not be equal")
 	assert.NotEqual(true, actualValueResult2, "They should not be equal")
@@ -269,7 +268,6 @@ func TestFindCategoryProductById_NotFound(t *testing.T) {
 	assert.Equal(&model.CategoryProduct{}, actualModel3, "They should be equal")
 }
 
-
 func TestFindCategoryProductById_Found(t *testing.T) {
 	assert := assert.New(t)
 
@@ -281,7 +279,6 @@ func TestFindCategoryProductById_Found(t *testing.T) {
 	categoryProductId2 := "CTG0000003"
 	categoryProductId3 := "CTG00000015"
 
-
 	expectedMessageResult1 := ""
 	expectedMessageResult2 := ""
 	expectedMessageResult3 := ""
@@ -292,7 +289,7 @@ func TestFindCategoryProductById_Found(t *testing.T) {
 
 	expectedModel1 := &model.CategoryProduct{
 		CategoryProductId: categoryProductId1,
-		Category: "Technology",
+		Category:          "Technology",
 		Audit: model.Audit{
 			CreatedAt: "2021-03-26 12:19:12",
 			UpdatedAt: nil,
@@ -302,7 +299,7 @@ func TestFindCategoryProductById_Found(t *testing.T) {
 	updatedAt2 := "2021-03-22 13:42:01"
 	expectedModel2 := &model.CategoryProduct{
 		CategoryProductId: categoryProductId2,
-		Category: "New Category Again Again",
+		Category:          "New Category Again Again",
 		Audit: model.Audit{
 			CreatedAt: "2021-03-22 12:59:12",
 			UpdatedAt: &updatedAt2,
@@ -311,7 +308,7 @@ func TestFindCategoryProductById_Found(t *testing.T) {
 
 	expectedModel3 := &model.CategoryProduct{
 		CategoryProductId: categoryProductId3,
-		Category: "Health",
+		Category:          "Health",
 		Audit: model.Audit{
 			CreatedAt: "2021-03-26 12:15:12",
 			UpdatedAt: nil,
@@ -322,7 +319,6 @@ func TestFindCategoryProductById_Found(t *testing.T) {
 	if err1 != nil {
 		actualMessageResult1 = fmt.Sprintf("%s", err1)
 	}
-
 
 	actualModel2, err2 := categoryProductModel2.FindCategoryProductById(categoryProductId2)
 	if err2 != nil {

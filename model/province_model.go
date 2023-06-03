@@ -7,9 +7,9 @@ import (
 )
 
 type Province struct {
-	ProvinceId	int	`json:"provinceId"`
-	Province   	string	`json:"province"`
-	Audit		Audit	`json:"audit"`
+	ProvinceId int    `json:"provinceId"`
+	Province   string `json:"province"`
+	Audit      Audit  `json:"audit"`
 }
 
 func (p *Province) GetNumberRecords() (int, error) {
@@ -85,13 +85,12 @@ func (p *Province) FindProvinceById(provinceId int) (*Province, error) {
 		return &Province{}, err
 	}
 
-	if p  == (&Province{}) {
+	if p == (&Province{}) {
 		return &Province{}, errors.New("The province can't found!")
 	}
 
 	return p, nil
 }
-
 
 func (p *Province) UpdateProvinceById(provinceId int) (*Province, error) {
 	db, err := utility.ConnectDB()
@@ -101,12 +100,12 @@ func (p *Province) UpdateProvinceById(provinceId int) (*Province, error) {
 	defer db.Close()
 
 	result, err := db.Exec("UPDATE province SET province = ?, created_at = ?, updated_at = ? WHERE province_id = ?",
-			p.Province,
-			p.Audit.CreatedAt,
-			p.Audit.UpdatedAt,
-			provinceId)
+		p.Province,
+		p.Audit.CreatedAt,
+		p.Audit.UpdatedAt,
+		provinceId)
 	if err != nil {
-		return &Province{},err
+		return &Province{}, err
 	}
 
 	rowsAffected, err := result.RowsAffected()

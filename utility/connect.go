@@ -1,9 +1,9 @@
 package utility
 
 import (
-	"os"
-	"fmt"
 	"database/sql"
+	"fmt"
+	"os"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -22,4 +22,3 @@ func ConnectDB() (*sql.DB, error) {
 	}
 	return db, nil
 }
-

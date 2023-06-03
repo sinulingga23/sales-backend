@@ -1,20 +1,20 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"log"
-	"errors"
 
 	"sales-backend/utility"
 )
 
 type Address struct {
-	AddressId	int	`json:"addressId"`
-	ProvinceId	int 	`json:"provinceId"`
-	CityId		int	`json:"cityId"`
-	SubDistrictId	int	`json:"subDistrictId"`
-	Address		string	`json:"address"`
-	Audit		Audit	`json:"audit"`
+	AddressId     int    `json:"addressId"`
+	ProvinceId    int    `json:"provinceId"`
+	CityId        int    `json:"cityId"`
+	SubDistrictId int    `json:"subDistrictId"`
+	Address       string `json:"address"`
+	Audit         Audit  `json:"audit"`
 }
 
 func (a *Address) IsAddressExistsById(addressId int) (bool, error) {
@@ -129,7 +129,7 @@ func (a *Address) DeleteAddressById(addressId int) (bool, error) {
 	}
 	defer db.Close()
 
-	result, err :=  db.Exec("DELETE FROM address WHERE address_id = ?", addressId)
+	result, err := db.Exec("DELETE FROM address WHERE address_id = ?", addressId)
 	if err != nil {
 		return false, err
 	}

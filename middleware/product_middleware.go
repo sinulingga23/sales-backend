@@ -1,15 +1,16 @@
 package middleware
 
 import (
-	"log"
+	"bytes"
 	"fmt"
 	"io/ioutil"
-	"bytes"
+	"log"
 	"net/http"
 	"strings"
 
 	"sales-backend/model"
 	"sales-backend/response"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,10 +26,10 @@ func ValidateProduct() gin.HandlerFunc {
 		err := c.Bind(&requestProduct)
 		if err != nil {
 			log.Printf("%s", err)
-			c.JSON(http.StatusBadRequest, response.ResponseErrors {
-				StatusCode:	http.StatusBadRequest,
-				Message:	"Invalid Request",
-				Errors:		"Bad Request",
+			c.JSON(http.StatusBadRequest, response.ResponseErrors{
+				StatusCode: http.StatusBadRequest,
+				Message:    "Invalid Request",
+				Errors:     "Bad Request",
 			})
 			return
 		}
@@ -48,10 +49,10 @@ func ValidateProduct() gin.HandlerFunc {
 			isThereCategoryProduct, err := categoryProductModel.IsCategoryProductExistsById(requestProduct.CategoryProductId)
 			if err != nil {
 				log.Printf("%s", err)
-				c.JSON(http.StatusInternalServerError, response.ResponseErrors {
-					StatusCode:	http.StatusInternalServerError,
-					Message:	"The server can't handle the request.",
-					Errors:		fmt.Sprintf("%s", err),
+				c.JSON(http.StatusInternalServerError, response.ResponseErrors{
+					StatusCode: http.StatusInternalServerError,
+					Message:    "The server can't handle the request.",
+					Errors:     fmt.Sprintf("%s", err),
 				})
 				return
 			}
@@ -93,10 +94,10 @@ func ValidateProduct() gin.HandlerFunc {
 		}
 
 		if isThereInvalid {
-			c.JSON(http.StatusBadRequest, response.ResponseInvalids {
-				StatusCode:	http.StatusBadRequest,
-				Message:	"Make sure the fields is valid",
-				Invalid:	listInvalid,
+			c.JSON(http.StatusBadRequest, response.ResponseInvalids{
+				StatusCode: http.StatusBadRequest,
+				Message:    "Make sure the fields is valid",
+				Invalid:    listInvalid,
 			})
 			c.Abort()
 			return

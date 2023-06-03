@@ -4,7 +4,13 @@ services:
     image: mysql/mysql-server:8.0
     container_name: sales_mysql
     environment:
-      MYSQL_ROOT_PASWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+    volumes:
+      - 'sales-backend-mysql:/var/lib/mysql'
+    networks:
+      - sales-backend
   sales_backend:
     container_name: sales_backend
     depends_on:
@@ -19,3 +25,13 @@ services:
         DB_NAME: ${DB_NAME}
     ports:
       - "8085:8085"
+    networks:
+      - sales-backend
+
+networks:
+  sales-backend:
+    driver: bridge
+
+volumes:
+  sales-backend-mysql:
+    driver: local

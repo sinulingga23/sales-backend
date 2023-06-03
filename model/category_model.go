@@ -154,7 +154,6 @@ func (c *CategoryProduct) GetNumberRecords() (int, error) {
 	return numberRecords, nil
 }
 
-
 func (c *CategoryProduct) FindAllCategoryProduct(limit int, offset int) ([]*CategoryProduct, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {

@@ -1,10 +1,9 @@
 package model
 
-
 import (
-	"fmt"
-	"errors"
 	"crypto/subtle"
+	"errors"
+	"fmt"
 	"sales-backend/utility"
 
 	"golang.org/x/crypto/bcrypt"
@@ -29,7 +28,6 @@ func (l Login) CheckPasswordMatch(currentPassword string, hashedPassword string)
 	return true, nil
 }
 
-
 func (l Login) Login(email string, password string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
@@ -37,8 +35,8 @@ func (l Login) Login(email string, password string) (bool, error) {
 	}
 	defer db.Close()
 
-	var expectedEmail 	string
-	var expectedPassword 	string
+	var expectedEmail string
+	var expectedPassword string
 	err = db.QueryRow("SELECT email, password FROM users WHERE email = ?", email).Scan(&expectedEmail, &expectedPassword)
 	if err != nil {
 		return false, err

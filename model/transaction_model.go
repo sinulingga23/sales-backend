@@ -1,18 +1,18 @@
 package model
 
 import (
-	"fmt"
 	"errors"
+	"fmt"
 
 	"sales-backend/utility"
 )
 
 type Transaction struct {
-	TransactionId	string 	`json:"transactionId"`
-	CustomerId	string 	`json:"customerId"`
-	EmployeeId	string 	`json:"employeeId"`
-	Date		string 	`json:"date"`
-	Audit		Audit 	`json:"audit"`
+	TransactionId string `json:"transactionId"`
+	CustomerId    string `json:"customerId"`
+	EmployeeId    string `json:"employeeId"`
+	Date          string `json:"date"`
+	Audit         Audit  `json:"audit"`
 }
 
 func (t *Transaction) IsTransactionExistsById(transactionId string) (bool, error) {

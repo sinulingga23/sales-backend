@@ -1,18 +1,18 @@
 package model
 
 import (
+	"errors"
 	"fmt"
 	"log"
-	"errors"
 
 	"sales-backend/utility"
 )
 
 type SubDistrict struct {
-	SubDistrictId	int	`json:"subDistrictId"`
-	CityId		int	`json:"cityId"`
-	SubDistrict	string	`json:"subDistrict"`
-	Audit		Audit	`json:"audit"`
+	SubDistrictId int    `json:"subDistrictId"`
+	CityId        int    `json:"cityId"`
+	SubDistrict   string `json:"subDistrict"`
+	Audit         Audit  `json:"audit"`
 }
 
 func (sD *SubDistrict) GetNumberRecords() (int, error) {
@@ -55,7 +55,7 @@ func (sD *SubDistrict) IsSubDistrictExistsById(subDistrictId int) (bool, error) 
 	}
 	defer db.Close()
 
-	check := 0;
+	check := 0
 	err = db.QueryRow("SELECT COUNT(sub_district_id) FROM sub_district WHERE sub_district_id = ?", subDistrictId).Scan(&check)
 	if err != nil {
 		log.Printf("%s", err)
@@ -156,7 +156,7 @@ func (sD *SubDistrict) DeleteSubDistrictById(subDistrictId int) (bool, error) {
 	defer db.Close()
 
 	result, err := db.Exec("DELETE FROM sub_district WHERE sub_district_id = ?", subDistrictId)
-	if err != nil{
+	if err != nil {
 		return false, errors.New("Somethings wrong!")
 	}
 

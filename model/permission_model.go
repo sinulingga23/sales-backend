@@ -7,10 +7,10 @@ import (
 )
 
 type Permission struct {
-	PermissionId	int 	`json:"permissionId"`
-	RoleId		int 	`json:"roleId"`
-	Permission	string	`json:"permission"`
-	Audit		Audit	`json:"audit"`
+	PermissionId int    `json:"permissionId"`
+	RoleId       int    `json:"roleId"`
+	Permission   string `json:"permission"`
+	Audit        Audit  `json:"audit"`
 }
 
 func (p *Permission) IsPermissionExistsById(permissionId int) (bool, error) {
