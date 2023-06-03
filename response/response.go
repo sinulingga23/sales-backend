@@ -1,7 +1,7 @@
 package response
 
 import (
-	"sales-backend/model"
+	"github.com/sinulingga23/sales-backend/model"
 )
 
 type ResponseGeneric struct {

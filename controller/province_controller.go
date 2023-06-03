@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"sales-backend/model"
-	"sales-backend/response"
-	"sales-backend/utility"
+	"github.com/sinulingga23/sales-backend/model"
+	"github.com/sinulingga23/sales-backend/response"
+	"github.com/sinulingga23/sales-backend/utility"
 
 	"github.com/gin-gonic/gin"
 )

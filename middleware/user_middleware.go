@@ -1,18 +1,18 @@
 package middleware
 
 import (
-	"log"
-	"fmt"
-	"regexp"
-	"io/ioutil"
 	"bytes"
+	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"net/mail"
+	"regexp"
 	"strings"
 
-	"sales-backend/model"
-	"sales-backend/response"
 	"github.com/gin-gonic/gin"
+	"github.com/sinulingga23/sales-backend/model"
+	"github.com/sinulingga23/sales-backend/response"
 )
 
 func ValidateUser() gin.HandlerFunc {
@@ -27,10 +27,10 @@ func ValidateUser() gin.HandlerFunc {
 		err := c.Bind(&requestUserRegister)
 		if err != nil {
 			log.Print("%s", err)
-			c.JSON(http.StatusBadRequest, response.ResponseErrors {
-				StatusCode:	http.StatusBadRequest,
-				Message:	"Invalid Request",
-				Errors:		"Bad Request",
+			c.JSON(http.StatusBadRequest, response.ResponseErrors{
+				StatusCode: http.StatusBadRequest,
+				Message:    "Invalid Request",
+				Errors:     "Bad Request",
 			})
 			return
 		}
@@ -53,10 +53,10 @@ func ValidateUser() gin.HandlerFunc {
 			isThereRoleId, err := userRegisterModel.IsRoleExistsById(requestUserRegister.RoleId)
 			if err != nil {
 				log.Printf("%s", err)
-				c.JSON(http.StatusInternalServerError, response.ResponseErrors {
-					StatusCode:	http.StatusInternalServerError,
-					Message:	"The server can't handle the request",
-					Errors:		fmt.Sprintf("%s", err),
+				c.JSON(http.StatusInternalServerError, response.ResponseErrors{
+					StatusCode: http.StatusInternalServerError,
+					Message:    "The server can't handle the request",
+					Errors:     fmt.Sprintf("%s", err),
 				})
 				return
 			}
@@ -77,10 +77,10 @@ func ValidateUser() gin.HandlerFunc {
 			isThereProvinceId, err := provinceModel.IsProvinceExistsById(provinceId)
 			if err != nil {
 				log.Print("%s", err)
-				c.JSON(http.StatusInternalServerError, response.ResponseErrors {
-					StatusCode:	http.StatusInternalServerError,
-					Message:	"The server can't handle the request",
-					Errors:		fmt.Sprintf("%s", err),
+				c.JSON(http.StatusInternalServerError, response.ResponseErrors{
+					StatusCode: http.StatusInternalServerError,
+					Message:    "The server can't handle the request",
+					Errors:     fmt.Sprintf("%s", err),
 				})
 				return
 			}
@@ -100,10 +100,10 @@ func ValidateUser() gin.HandlerFunc {
 			var cityId int = requestUserRegister.CityId
 			isThereCityId, err := cityModel.IsCityExistsById(cityId)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, response.ResponseErrors {
-					StatusCode:	http.StatusInternalServerError,
-					Message:	"The server can't handle the request",
-					Errors:		fmt.Sprintf("%s", err),
+				c.JSON(http.StatusInternalServerError, response.ResponseErrors{
+					StatusCode: http.StatusInternalServerError,
+					Message:    "The server can't handle the request",
+					Errors:     fmt.Sprintf("%s", err),
 				})
 				return
 			}
@@ -123,10 +123,10 @@ func ValidateUser() gin.HandlerFunc {
 			isThereSubDistrictId, err := subDistrictModel.IsSubDistrictExistsById(requestUserRegister.SubDistrictId)
 			if err != nil {
 				log.Printf("%s", err)
-				c.JSON(http.StatusInternalServerError, response.ResponseErrors {
-					StatusCode:	http.StatusInternalServerError,
-					Message:	"The server can't handle the request",
-					Errors:		fmt.Sprintf("%s", err),
+				c.JSON(http.StatusInternalServerError, response.ResponseErrors{
+					StatusCode: http.StatusInternalServerError,
+					Message:    "The server can't handle the request",
+					Errors:     fmt.Sprintf("%s", err),
 				})
 				return
 			}
@@ -144,10 +144,10 @@ func ValidateUser() gin.HandlerFunc {
 		} else {
 			isThereEmail, err := userRegisterModel.IsUserExistsByEmail(requestUserRegister.Email)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, response.ResponseErrors {
-					StatusCode:	http.StatusInternalServerError,
-					Message:	"The server can't handle the request",
-					Errors:		fmt.Sprintf("%s", err),
+				c.JSON(http.StatusInternalServerError, response.ResponseErrors{
+					StatusCode: http.StatusInternalServerError,
+					Message:    "The server can't handle the request",
+					Errors:     fmt.Sprintf("%s", err),
 				})
 				return
 			}
@@ -174,7 +174,7 @@ func ValidateUser() gin.HandlerFunc {
 		}
 
 		// validate the Address field
-		if len(strings.Trim(requestUserRegister.Address, "" )) == 0 {
+		if len(strings.Trim(requestUserRegister.Address, "")) == 0 {
 			isThereInvalid = true
 			listInvalid["err_address"] = "The Address can't be empty"
 		}
@@ -187,10 +187,10 @@ func ValidateUser() gin.HandlerFunc {
 		} else {
 			isTherePhoneNumber, err := userRegisterModel.IsPhoneNumberExists(requestUserRegister.PhoneNumber)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, response.ResponseErrors {
-					StatusCode:	http.StatusInternalServerError,
-					Message:	"The server can't handle the request",
-					Errors:		fmt.Sprintf("%s", err),
+				c.JSON(http.StatusInternalServerError, response.ResponseErrors{
+					StatusCode: http.StatusInternalServerError,
+					Message:    "The server can't handle the request",
+					Errors:     fmt.Sprintf("%s", err),
 				})
 				return
 			}
@@ -202,10 +202,10 @@ func ValidateUser() gin.HandlerFunc {
 		}
 
 		if isThereInvalid {
-			c.JSON(http.StatusBadRequest, response.ResponseInvalids {
-				StatusCode:	http.StatusBadRequest,
-				Message:	"Make sure the fields is valid",
-				Invalid:	listInvalid,
+			c.JSON(http.StatusBadRequest, response.ResponseInvalids{
+				StatusCode: http.StatusBadRequest,
+				Message:    "Make sure the fields is valid",
+				Invalid:    listInvalid,
 			})
 			c.Abort()
 			return

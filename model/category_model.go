@@ -4,7 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"sales-backend/utility"
+
+	"github.com/sinulingga23/sales-backend/utility"
 )
 
 type CategoryProduct struct {

@@ -1,40 +1,41 @@
 package model
 
 import (
-	"log"
 	"errors"
 	"fmt"
-	"sales-backend/utility"
+	"log"
+
+	"github.com/sinulingga23/sales-backend/utility"
 )
+
 type User struct {
-	UserId		string	`json:"userId"`
-	RoleId		int 	`json:"roleId"`
-	AddressId	int	`json:"addressId"`
-	FirstName	string	`json:"firstName"`
-	LastName	string	`json:"lastName"`
-	Gender		string	`json:"gender"`
-	Address		string	`json:"address"`
-	Email		string	`json:"address"`
-	PhoneNumber	string	`json:"phoneNumber"`
-	Audit		Audit	`json:"audit"`
+	UserId      string `json:"userId"`
+	RoleId      int    `json:"roleId"`
+	AddressId   int    `json:"addressId"`
+	FirstName   string `json:"firstName"`
+	LastName    string `json:"lastName"`
+	Gender      string `json:"gender"`
+	Address     string `json:"address"`
+	Email       string `json:"address"`
+	PhoneNumber string `json:"phoneNumber"`
+	Audit       Audit  `json:"audit"`
 }
 
 type UserRegister struct {
-	UserId		string	`json:"userId"`
-	RoleId		int 	`json:"roleId"`
-	ProvinceId	int 	`json:"provinceId"`
-	CityId		int 	`json:"cityId"`
-	SubDistrictId	int 	`json:"subDistrictId"`
-	FirstName	string	`json:"firstName"`
-	LastName	string	`json:"lastName"`
-	Gender		string	`json:"gender"`
-	Address		string	`json:"address"`
-	Email		string	`json:"email"`
-	Password	string	`json:"password"`
-	PhoneNumber	string	`json:"phoneNumber"`
-	Audit		Audit	`json:"audit"`
+	UserId        string `json:"userId"`
+	RoleId        int    `json:"roleId"`
+	ProvinceId    int    `json:"provinceId"`
+	CityId        int    `json:"cityId"`
+	SubDistrictId int    `json:"subDistrictId"`
+	FirstName     string `json:"firstName"`
+	LastName      string `json:"lastName"`
+	Gender        string `json:"gender"`
+	Address       string `json:"address"`
+	Email         string `json:"email"`
+	Password      string `json:"password"`
+	PhoneNumber   string `json:"phoneNumber"`
+	Audit         Audit  `json:"audit"`
 }
-
 
 func (uR *UserRegister) IsPhoneNumberExists(phoneNumber string) (bool, error) {
 	db, err := utility.ConnectDB()
@@ -87,7 +88,7 @@ func (uR *UserRegister) IsUserExistsByEmail(email string) (bool, error) {
 	defer db.Close()
 
 	check := 0
-	err  = db.QueryRow("SELECT COUNT(user_id) FROM users WHERE email = ?", email).Scan(&check)
+	err = db.QueryRow("SELECT COUNT(user_id) FROM users WHERE email = ?", email).Scan(&check)
 	if err != nil {
 		return false, err
 	}
@@ -203,16 +204,16 @@ func (uR *UserRegister) SaveUser() (*User, error) {
 	}
 
 	createdUser := &User{
-		UserId: 	uR.UserId,
-		RoleId: 	uR.RoleId,
-		AddressId:	int(addressId),
-		FirstName:	uR.FirstName,
-		LastName:	uR.LastName,
-		Gender:		uR.Gender,
-		Address:	uR.Address,
-		Email:		uR.Email,
-		PhoneNumber:	uR.PhoneNumber,
-		Audit:		Audit{CreatedAt: uR.Audit.CreatedAt},
+		UserId:      uR.UserId,
+		RoleId:      uR.RoleId,
+		AddressId:   int(addressId),
+		FirstName:   uR.FirstName,
+		LastName:    uR.LastName,
+		Gender:      uR.Gender,
+		Address:     uR.Address,
+		Email:       uR.Email,
+		PhoneNumber: uR.PhoneNumber,
+		Audit:       Audit{CreatedAt: uR.Audit.CreatedAt},
 	}
 
 	return createdUser, nil

@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"sales-backend/middleware"
+	"github.com/sinulingga23/sales-backend/middleware"
 
 	"github.com/gin-gonic/gin"
 )

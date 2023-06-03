@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"sales-backend/utility"
+	"github.com/sinulingga23/sales-backend/utility"
 )
 
 type Transaction struct {

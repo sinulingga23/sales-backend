@@ -1,22 +1,22 @@
 package model
 
 import (
-	"log"
-	"fmt"
 	"errors"
+	"fmt"
+	"log"
 
-	"sales-backend/utility"
+	"github.com/sinulingga23/sales-backend/utility"
 )
 
 type Product struct {
-	ProductId		string	`json:"productId"`
-	CategoryProductId	string  `json:"categoryProductId"`
-	Name             	string  `json:"name"`
-	Unit             	string  `json:"unit"`
-	Price            	float64 `json:"price"`
-	Stock            	int     `json:"stock"`
-	AddStock		int 	`json:"addStock"` // Use this field for adding new stock
-	Audit            	Audit   `json:"audit"`
+	ProductId         string  `json:"productId"`
+	CategoryProductId string  `json:"categoryProductId"`
+	Name              string  `json:"name"`
+	Unit              string  `json:"unit"`
+	Price             float64 `json:"price"`
+	Stock             int     `json:"stock"`
+	AddStock          int     `json:"addStock"` // Use this field for adding new stock
+	Audit             Audit   `json:"audit"`
 }
 
 func (p *Product) GetNumberRecords() (int, error) {
@@ -51,7 +51,7 @@ func (p *Product) GetNumberRecordsByCategoryProductId(categoryProductId string) 
 	return numberRecords, nil
 }
 
-func (p *Product) IsProductExistsById(productId string)  (bool, error) {
+func (p *Product) IsProductExistsById(productId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		log.Printf("%s", err)
@@ -200,7 +200,7 @@ func (p *Product) DeleteProductById(productId string) (bool, error) {
 	return true, nil
 }
 
-func (p *Product) FindAllProduct(limit int, offset int) ([]*Product, error){
+func (p *Product) FindAllProduct(limit int, offset int) ([]*Product, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		log.Printf("%s", err)

@@ -4,7 +4,8 @@ import (
 	"crypto/subtle"
 	"errors"
 	"fmt"
-	"sales-backend/utility"
+
+	"github.com/sinulingga23/sales-backend/utility"
 
 	"golang.org/x/crypto/bcrypt"
 )

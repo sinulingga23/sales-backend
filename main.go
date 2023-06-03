@@ -1,7 +1,7 @@
 package main
 
 import (
-	"sales-backend/controller"
+	"github.com/sinulingga23/sales-backend/controller"
 )
 
 func main() {

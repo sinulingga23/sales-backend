@@ -5,7 +5,7 @@ import (
 	"log"
 	"testing"
 
-	"sales-backend/model"
+	"github.com/sinulingga23/sales-backend/model"
 
 	"github.com/stretchr/testify/assert"
 )

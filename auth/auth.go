@@ -1,12 +1,12 @@
 package auth
 
 import (
-	"os"
-	"fmt"
 	"errors"
-	"strings"
+	"fmt"
 	"net/http"
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt"
@@ -21,12 +21,12 @@ func CreateToken(email string, roleId int) (string, error) {
 
 	claims := struct {
 		jwt.StandardClaims
-		Email	string
-		RoleId	int
+		Email  string
+		RoleId int
 	}{
 		jwt.StandardClaims{
-			ExpiresAt: 	time.Now().Add(time.Hour * 1).Unix(),
-			Issuer:		email,
+			ExpiresAt: time.Now().Add(time.Hour * 1).Unix(),
+			Issuer:    email,
 		},
 		email,
 		roleId,
@@ -75,7 +75,7 @@ func ExtractTokenEmail(r *http.Request) (string, error) {
 	}
 	token, err := jwt.Parse(bearerToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"]);
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
 	})
@@ -98,7 +98,7 @@ func ExtractTokenRoleId(r *http.Request) (int, error) {
 	}
 	token, err := jwt.Parse(bearerToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"]);
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
 	})

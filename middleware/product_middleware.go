@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strings"
 
-	"sales-backend/model"
-	"sales-backend/response"
+	"github.com/sinulingga23/sales-backend/model"
+	"github.com/sinulingga23/sales-backend/response"
 
 	"github.com/gin-gonic/gin"
 )

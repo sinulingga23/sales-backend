@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"sales-backend/utility"
+	"github.com/sinulingga23/sales-backend/utility"
 )
 
 type Address struct {

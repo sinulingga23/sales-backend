@@ -3,7 +3,7 @@ package model
 import (
 	"errors"
 
-	"sales-backend/utility"
+	"github.com/sinulingga23/sales-backend/utility"
 )
 
 const (
