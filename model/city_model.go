@@ -5,17 +5,18 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/google/uuid"
 	"github.com/sinulingga23/sales-backend/utility"
 )
 
 type City struct {
-	CityId     int    `json:"cityId"`
-	ProvinceId int    `json:"provinceId"`
+	CityId     string `json:"cityId"`
+	ProvinceId string `json:"provinceId"`
 	City       string `json:"city"`
 	Audit      Audit  `json:"audit"`
 }
 
-func (c *City) IsCityExistsById(cityId int) (bool, error) {
+func (c *City) IsCityExistsById(cityId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, errors.New("Somethings wrong!")
@@ -42,7 +43,9 @@ func (c *City) SaveCity() (*City, error) {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("INSERT INTO city (province_id, city, created_at) VALUES (?, ?, ?)",
+	cityId := uuid.NewString()
+	_, err = db.Exec("INSERT INTO city (city_id, province_id, city, created_at) VALUES (?, ?, ?)",
+		cityId,
 		c.ProvinceId,
 		c.City,
 		c.Audit.CreatedAt)
@@ -50,16 +53,11 @@ func (c *City) SaveCity() (*City, error) {
 		return &City{}, errors.New("Somethings wrong!")
 	}
 
-	currentId, err := result.LastInsertId()
-	if err != nil {
-		return &City{}, errors.New("Somethings wrong!")
-	}
-
-	c.CityId = int(currentId)
+	c.CityId = cityId
 	return c, nil
 }
 
-func (c *City) FindCityById(cityId int) (*City, error) {
+func (c *City) FindCityById(cityId string) (*City, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return &City{}, errors.New("Somethings wrong!")
@@ -73,13 +71,13 @@ func (c *City) FindCityById(cityId int) (*City, error) {
 	}
 
 	if c == (&City{}) {
-		return &City{}, errors.New(fmt.Sprintf("Can't find city with id: %d", cityId))
+		return &City{}, errors.New(fmt.Sprintf("Can't find city with id: %v", cityId))
 	}
 
 	return c, nil
 }
 
-func (c *City) UpdateCityById(cityId int) (*City, error) {
+func (c *City) UpdateCityById(cityId string) (*City, error) {
 	db, err := utility.ConnectDB()
 	if err != nil || c.CityId != cityId {
 		return &City{}, errors.New("Somethings wrong!")
@@ -111,7 +109,7 @@ func (c *City) UpdateCityById(cityId int) (*City, error) {
 	return c, nil
 }
 
-func (c *City) DeleteCityById(cityId int) (bool, error) {
+func (c *City) DeleteCityById(cityId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, errors.New("Somethings wrong!")
@@ -166,7 +164,7 @@ func (c *City) FindAllCity(limit int, offset int) ([]*City, error) {
 	return result, nil
 }
 
-func (c *City) FindAllSubDistrictByCityId(cityId int, limit int, offset int) ([]*SubDistrict, error) {
+func (c *City) FindAllSubDistrictByCityId(cityId string, limit int, offset int) ([]*SubDistrict, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		log.Printf("%v", err)
@@ -217,7 +215,7 @@ func (c *City) GetNumberRecords() (int, error) {
 	return numberRecords, nil
 }
 
-func (c *City) GetNumberRecordsByProvinceId(provinceId int) (int, error) {
+func (c *City) GetNumberRecordsByProvinceId(provinceId string) (int, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return 0, err

@@ -3,11 +3,12 @@ package model
 import (
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/sinulingga23/sales-backend/utility"
 )
 
 type Province struct {
-	ProvinceId int    `json:"provinceId"`
+	ProvinceId string `json:"provinceId"`
 	Province   string `json:"province"`
 	Audit      Audit  `json:"audit"`
 }
@@ -28,7 +29,7 @@ func (p *Province) GetNumberRecords() (int, error) {
 	return numberRecords, nil
 }
 
-func (p *Province) IsProvinceExistsById(provinceId int) (bool, error) {
+func (p *Province) IsProvinceExistsById(provinceId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, err
@@ -55,7 +56,9 @@ func (p *Province) SaveProvince() (*Province, error) {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("INSERT INTO province (province, created_at) VALUES (?, ?)",
+	provinceId := uuid.NewString()
+	_, err = db.Exec("INSERT INTO province (province_id, province, created_at) VALUES (?, ?)",
+		provinceId,
 		p.Province,
 		p.Audit.CreatedAt)
 
@@ -63,16 +66,11 @@ func (p *Province) SaveProvince() (*Province, error) {
 		return &Province{}, err
 	}
 
-	currentId, err := result.LastInsertId()
-	if err != nil {
-		return &Province{}, err
-	}
-
-	p.ProvinceId = int(currentId)
+	p.ProvinceId = provinceId
 	return p, nil
 }
 
-func (p *Province) FindProvinceById(provinceId int) (*Province, error) {
+func (p *Province) FindProvinceById(provinceId string) (*Province, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return &Province{}, err
@@ -92,7 +90,7 @@ func (p *Province) FindProvinceById(provinceId int) (*Province, error) {
 	return p, nil
 }
 
-func (p *Province) UpdateProvinceById(provinceId int) (*Province, error) {
+func (p *Province) UpdateProvinceById(provinceId string) (*Province, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return &Province{}, err
@@ -120,7 +118,7 @@ func (p *Province) UpdateProvinceById(provinceId int) (*Province, error) {
 	return p, nil
 }
 
-func (p *Province) DeleteProvinceById(provinceId int) (bool, error) {
+func (p *Province) DeleteProvinceById(provinceId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, err
@@ -176,7 +174,7 @@ func (p *Province) FindAllProvince(limit int, offset int) ([]*Province, error) {
 	return result, nil
 }
 
-func (p *Province) FindAllCityByProvinceId(provinceId int, limit int, offset int) ([]*City, error) {
+func (p *Province) FindAllCityByProvinceId(provinceId string, limit int, offset int) ([]*City, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return []*City{}, err

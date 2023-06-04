@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/google/uuid"
 	"github.com/sinulingga23/sales-backend/utility"
 )
 
 type User struct {
 	UserId      string `json:"userId"`
-	RoleId      int    `json:"roleId"`
-	AddressId   int    `json:"addressId"`
+	RoleId      string `json:"roleId"`
+	AddressId   string `json:"addressId"`
 	FirstName   string `json:"firstName"`
 	LastName    string `json:"lastName"`
 	Gender      string `json:"gender"`
@@ -23,10 +24,10 @@ type User struct {
 
 type UserRegister struct {
 	UserId        string `json:"userId"`
-	RoleId        int    `json:"roleId"`
-	ProvinceId    int    `json:"provinceId"`
-	CityId        int    `json:"cityId"`
-	SubDistrictId int    `json:"subDistrictId"`
+	RoleId        string `json:"roleId"`
+	ProvinceId    string `json:"provinceId"`
+	CityId        string `json:"cityId"`
+	SubDistrictId string `json:"subDistrictId"`
 	FirstName     string `json:"firstName"`
 	LastName      string `json:"lastName"`
 	Gender        string `json:"gender"`
@@ -59,7 +60,7 @@ func (uR *UserRegister) IsPhoneNumberExists(phoneNumber string) (bool, error) {
 
 // This function is just temporary implemenation, soon will be moved
 // into associated struct
-func (uR *UserRegister) IsRoleExistsById(roleId int) (bool, error) {
+func (uR *UserRegister) IsRoleExistsById(roleId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, errors.New("Somethings wrong!")
@@ -159,18 +160,14 @@ func (uR *UserRegister) SaveUser() (*User, error) {
 		return &User{}, err
 	}
 
-	result, err := tx.Exec("INSERT INTO address (province_id, city_id, sub_district_id, address, created_at) VALUES (?, ?, ?, ?, ?)",
+	addressId := uuid.NewString()
+	_, err = tx.Exec("INSERT INTO address (address_id, province_id, city_id, sub_district_id, address, created_at) VALUES (?, ?, ?, ?, ?)",
+		addressId,
 		uR.ProvinceId,
 		uR.CityId,
 		uR.SubDistrictId,
 		uR.Address,
 		uR.Audit.CreatedAt)
-	if err != nil {
-		tx.Rollback()
-		return &User{}, err
-	}
-
-	addressId, err := result.LastInsertId()
 	if err != nil {
 		tx.Rollback()
 		return &User{}, err
@@ -206,7 +203,7 @@ func (uR *UserRegister) SaveUser() (*User, error) {
 	createdUser := &User{
 		UserId:      uR.UserId,
 		RoleId:      uR.RoleId,
-		AddressId:   int(addressId),
+		AddressId:   addressId,
 		FirstName:   uR.FirstName,
 		LastName:    uR.LastName,
 		Gender:      uR.Gender,

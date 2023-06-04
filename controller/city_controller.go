@@ -9,15 +9,17 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/sinulingga23/sales-backend/model"
 	"github.com/sinulingga23/sales-backend/response"
 	"github.com/sinulingga23/sales-backend/utility"
 )
 
 func GetCityById(c *gin.Context) {
-	cityId := 0
 
-	cityId, err := strconv.Atoi(c.Param("cityId"))
+	cityId := c.Param("cityId")
+	_, err := uuid.Parse(cityId)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
@@ -89,11 +91,12 @@ func CreateCity(c *gin.Context) {
 		return
 	}
 
-	if requestCity.ProvinceId < 0 {
+	_, err = uuid.Parse(requestCity.CityId)
+	if err != nil {
 		c.JSON(http.StatusNotFound, response.ResponseErrors{
 			StatusCode: http.StatusNotFound,
 			Message:    "Somethings wrong!",
-			Errors:     fmt.Sprintf("The Province with id %d is not exists.", requestCity.ProvinceId),
+			Errors:     fmt.Sprintf("The Province with id %v is not exists.", requestCity.ProvinceId),
 		})
 		return
 	}
@@ -154,7 +157,6 @@ func CreateCity(c *gin.Context) {
 }
 
 func UpdateCityById(c *gin.Context) {
-	cityId := 0
 	requestCity := model.City{}
 	provinceModel := model.Province{}
 
@@ -168,7 +170,8 @@ func UpdateCityById(c *gin.Context) {
 		return
 	}
 
-	cityId, err = strconv.Atoi(c.Param("cityId"))
+	cityId := c.Param("cityId")
+	_, err = uuid.Parse(cityId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseGeneric{
 			StatusCode: http.StatusBadRequest,
@@ -178,7 +181,7 @@ func UpdateCityById(c *gin.Context) {
 		return
 	}
 
-	if cityId != requestCity.CityId || (cityId <= 0 || requestCity.CityId <= 0) {
+	if cityId != requestCity.CityId {
 		c.JSON(http.StatusBadRequest, response.ResponseGeneric{
 			StatusCode: http.StatusBadRequest,
 			Message:    "Invalid format!",
@@ -284,9 +287,10 @@ func UpdateCityById(c *gin.Context) {
 }
 
 func DeleteCityById(c *gin.Context) {
-	cityId := 0
 
-	cityId, err := strconv.Atoi(c.Param("cityId"))
+	cityId := c.Param("cityId")
+	_, err := uuid.Parse(cityId)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
@@ -424,7 +428,6 @@ func GetCities(c *gin.Context) {
 func GetSubDistrictsByCityId(c *gin.Context) {
 	requestPage := c.DefaultQuery("page", "1")
 	requestLimit := c.DefaultQuery("limit", "10")
-	cityId := 0
 
 	page := 0
 	page, err := strconv.Atoi(requestPage)
@@ -448,7 +451,8 @@ func GetSubDistrictsByCityId(c *gin.Context) {
 		return
 	}
 
-	cityId, err = strconv.Atoi(c.Param("cityId"))
+	cityId := c.Param("cityId")
+	_, err = uuid.Parse(cityId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
@@ -488,7 +492,7 @@ func GetSubDistrictsByCityId(c *gin.Context) {
 			return
 		}
 
-		nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"provinces", strconv.Itoa(cityId), "cities"}, &page, &limit, numberRecordsSubDistrict)
+		nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"provinces", cityId, "cities"}, &page, &limit, numberRecordsSubDistrict)
 		offset := limit * (page - 1)
 
 		subDistricts, err := cityModel.FindAllSubDistrictByCityId(cityId, limit, offset)

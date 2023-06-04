@@ -3,17 +3,18 @@ package model
 import (
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/sinulingga23/sales-backend/utility"
 )
 
 type Permission struct {
-	PermissionId int    `json:"permissionId"`
-	RoleId       int    `json:"roleId"`
+	PermissionId string `json:"permissionId"`
+	RoleId       string `json:"roleId"`
 	Permission   string `json:"permission"`
 	Audit        Audit  `json:"audit"`
 }
 
-func (p *Permission) IsPermissionExistsById(permissionId int) (bool, error) {
+func (p *Permission) IsPermissionExistsById(permissionId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, errors.New("Somethings wrong!")
@@ -40,7 +41,9 @@ func (p *Permission) SavePermission() (*Permission, error) {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("INSERT INTO permissions (role_id, permission_name, created_at) VALUES (?, ?, ?)",
+	permissionId := uuid.NewString()
+	_, err = db.Exec("INSERT INTO permissions (permission_id, role_id, permission_name, created_at) VALUES (?, ?, ?)",
+		permissionId,
 		p.RoleId,
 		p.Permission,
 		p.Audit.CreatedAt)
@@ -48,16 +51,11 @@ func (p *Permission) SavePermission() (*Permission, error) {
 		return &Permission{}, errors.New("Somethings wrong!")
 	}
 
-	lastInsertId, err := result.LastInsertId()
-	if err != nil {
-		return &Permission{}, errors.New("Somethings wrong!")
-	}
-
-	p.PermissionId = int(lastInsertId)
+	p.PermissionId = permissionId
 	return p, nil
 }
 
-func (p *Permission) FindPermissionById(permissionId int) (*Permission, error) {
+func (p *Permission) FindPermissionById(permissionId string) (*Permission, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return &Permission{}, errors.New("Somethings wrong!")
@@ -77,7 +75,7 @@ func (p *Permission) FindPermissionById(permissionId int) (*Permission, error) {
 	return p, nil
 }
 
-func (p *Permission) UpdatePermissionById(permissionId int) (*Permission, error) {
+func (p *Permission) UpdatePermissionById(permissionId string) (*Permission, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return &Permission{}, errors.New("Somethings wrong!")
@@ -107,7 +105,7 @@ func (p *Permission) UpdatePermissionById(permissionId int) (*Permission, error)
 	return p, nil
 }
 
-func (p *Permission) DeletePermissionById(permissionId int) (bool, error) {
+func (p *Permission) DeletePermissionById(permissionId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, errors.New("Somethings wrong!")

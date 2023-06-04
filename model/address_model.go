@@ -11,14 +11,14 @@ import (
 
 type Address struct {
 	AddressId     string `json:"addressId"`
-	ProvinceId    int    `json:"provinceId"`
-	CityId        int    `json:"cityId"`
-	SubDistrictId int    `json:"subDistrictId"`
+	ProvinceId    string `json:"provinceId"`
+	CityId        string `json:"cityId"`
+	SubDistrictId string `json:"subDistrictId"`
 	Address       string `json:"address"`
 	Audit         Audit  `json:"audit"`
 }
 
-func (a *Address) IsAddressExistsById(addressId int) (bool, error) {
+func (a *Address) IsAddressExistsById(addressId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		log.Printf("%s", err)
@@ -40,7 +40,7 @@ func (a *Address) IsAddressExistsById(addressId int) (bool, error) {
 	return true, nil
 }
 
-func (a *Address) FindAddressById(addressId int) (*Address, error) {
+func (a *Address) FindAddressById(addressId string) (*Address, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		log.Printf("%s", err)
@@ -56,7 +56,7 @@ func (a *Address) FindAddressById(addressId int) (*Address, error) {
 	}
 
 	if a == (&Address{}) {
-		return &Address{}, errors.New(fmt.Sprintf("Can't find address with id: %d", addressId))
+		return &Address{}, errors.New(fmt.Sprintf("Can't find address with id: %v", addressId))
 	}
 
 	return a, nil

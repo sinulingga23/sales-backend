@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/sinulingga23/sales-backend/model"
 	"github.com/sinulingga23/sales-backend/response"
 	"github.com/sinulingga23/sales-backend/utility"
@@ -15,19 +16,9 @@ import (
 )
 
 func GetRoleById(c *gin.Context) {
-	roleId := 0
-
-	roleId, err := strconv.Atoi(c.Param("roleId"))
+	roleId := c.Param("roleId")
+	_, err := uuid.Parse(roleId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.ResponseErrors{
-			StatusCode: http.StatusBadRequest,
-			Message:    "Invalid",
-			Errors:     "Bad Request",
-		})
-		return
-	}
-
-	if roleId <= 0 {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
 			Message:    "Invalid",
@@ -131,7 +122,6 @@ func CreateRole(c *gin.Context) {
 func UpdateRole(c *gin.Context) {
 	requestRole := model.Role{}
 	roleModel := model.Role{}
-	roleId := 0
 
 	err := c.Bind(&requestRole)
 	if err != nil {
@@ -143,7 +133,8 @@ func UpdateRole(c *gin.Context) {
 		return
 	}
 
-	roleId, err = strconv.Atoi(c.Param("roleId"))
+	roleId := c.Param("roleId")
+	_, err = uuid.Parse(roleId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusOK,
@@ -153,16 +144,7 @@ func UpdateRole(c *gin.Context) {
 		return
 	}
 
-	if roleId <= 0 {
-		c.JSON(http.StatusBadRequest, response.ResponseErrors{
-			StatusCode: http.StatusBadRequest,
-			Message:    "Invalid",
-			Errors:     "Bad Request",
-		})
-		return
-	}
-
-	if roleId != requestRole.RoleId || (roleId <= 0 || requestRole.RoleId <= 0) {
+	if roleId != requestRole.RoleId {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
 			Message:    "Invalid Format!",
@@ -242,19 +224,10 @@ func UpdateRole(c *gin.Context) {
 }
 
 func DeleteRole(c *gin.Context) {
-	roleId := 0
 
-	roleId, err := strconv.Atoi(c.Param("roleId"))
+	roleId := c.Param("roleId")
+	_, err := uuid.Parse(roleId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.ResponseErrors{
-			StatusCode: http.StatusBadRequest,
-			Message:    "Invalid",
-			Errors:     "Bad Request",
-		})
-		return
-	}
-
-	if roleId <= 0 {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
 			Message:    "Invalid",
