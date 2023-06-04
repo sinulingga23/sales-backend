@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/google/uuid"
 	"github.com/sinulingga23/sales-backend/utility"
 )
 
 type Address struct {
-	AddressId     int    `json:"addressId"`
+	AddressId     string `json:"addressId"`
 	ProvinceId    int    `json:"provinceId"`
 	CityId        int    `json:"cityId"`
 	SubDistrictId int    `json:"subDistrictId"`
@@ -69,7 +70,9 @@ func (a *Address) SaveAddress() (*Address, error) {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("INSERT INTO address (province_id, city_id, sub_district_id, address, created_at) VALUES (?, ?, ?, ?, ?)",
+	addressid := uuid.NewString()
+	_, err = db.Exec("INSERT INTO address (address_id, province_id, city_id, sub_district_id, address, created_at) VALUES (?, ?, ?, ?, ?)",
+		addressid,
 		a.ProvinceId,
 		a.CityId,
 		a.SubDistrictId,
@@ -80,17 +83,11 @@ func (a *Address) SaveAddress() (*Address, error) {
 		return &Address{}, errors.New("Somethings wrong!")
 	}
 
-	currentId, err := result.LastInsertId()
-	if err != nil {
-		log.Printf("%s", err)
-		return &Address{}, errors.New("Somethings wrong!")
-	}
-
-	a.AddressId = int(currentId)
+	a.AddressId = addressid
 	return a, nil
 }
 
-func (a *Address) UpdateAddressById(addressId int) (*Address, error) {
+func (a *Address) UpdateAddressById(addressId string) (*Address, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return &Address{}, err
@@ -122,7 +119,7 @@ func (a *Address) UpdateAddressById(addressId int) (*Address, error) {
 	return a, nil
 }
 
-func (a *Address) DeleteAddressById(addressId int) (bool, error) {
+func (a *Address) DeleteAddressById(addressId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, err
