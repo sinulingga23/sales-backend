@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -91,10 +90,10 @@ func ExtractTokenEmail(r *http.Request) (string, error) {
 	return "", errors.New("Somethings wrong!")
 }
 
-func ExtractTokenRoleId(r *http.Request) (int, error) {
+func ExtractTokenRoleId(r *http.Request) (string, error) {
 	var bearerToken string
 	if bearerToken = ExtractToken(r); bearerToken == "" {
-		return 0, errors.New("Token is invalid")
+		return "", errors.New("Token is invalid")
 	}
 	token, err := jwt.Parse(bearerToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -103,17 +102,14 @@ func ExtractTokenRoleId(r *http.Request) (int, error) {
 		return []byte(os.Getenv("JWT_SECRET_KEY")), nil
 	})
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if ok && token.Valid {
-		roleId, err := strconv.ParseInt(fmt.Sprintf("%0.f", claims["RoleId"]), 10, 32)
-		if err != nil {
-			return 0, err
-		}
-		return int(roleId), nil
+		roleId := claims["RoleId"]
+		return roleId.(string), nil
 	}
 
-	return 0, errors.New("Somethings wrong!")
+	return "", errors.New("Somethings wrong!")
 }

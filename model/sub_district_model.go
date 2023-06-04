@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/google/uuid"
 	"github.com/sinulingga23/sales-backend/utility"
 )
 
 type SubDistrict struct {
-	SubDistrictId int    `json:"subDistrictId"`
-	CityId        int    `json:"cityId"`
+	SubDistrictId string `json:"subDistrictId"`
+	CityId        string `json:"cityId"`
 	SubDistrict   string `json:"subDistrict"`
 	Audit         Audit  `json:"audit"`
 }
@@ -31,7 +32,7 @@ func (sD *SubDistrict) GetNumberRecords() (int, error) {
 	return numberRecords, nil
 }
 
-func (sD *SubDistrict) GetNumberRecordsByCityId(cityId int) (int, error) {
+func (sD *SubDistrict) GetNumberRecordsByCityId(cityId string) (int, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return 0, err
@@ -47,7 +48,7 @@ func (sD *SubDistrict) GetNumberRecordsByCityId(cityId int) (int, error) {
 	return numberRecords, nil
 }
 
-func (sD *SubDistrict) IsSubDistrictExistsById(subDistrictId int) (bool, error) {
+func (sD *SubDistrict) IsSubDistrictExistsById(subDistrictId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		log.Printf("%s", err)
@@ -76,7 +77,9 @@ func (sD *SubDistrict) SaveSubDistrict() (*SubDistrict, error) {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("INSERT INTO sub_district (city_id, sub_district, created_at) VALUES (?, ?, ?)",
+	subDistrictId := uuid.NewString()
+	_, err = db.Exec("INSERT INTO sub_district (sub_district_id, city_id, sub_district, created_at) VALUES (?, ?, ?)",
+		subDistrictId,
 		sD.CityId,
 		sD.SubDistrict,
 		sD.Audit.CreatedAt)
@@ -84,16 +87,11 @@ func (sD *SubDistrict) SaveSubDistrict() (*SubDistrict, error) {
 		return &SubDistrict{}, errors.New("Somethings wrong!")
 	}
 
-	currentId, err := result.LastInsertId()
-	if err != nil {
-		return &SubDistrict{}, errors.New("Somethings wrong!")
-	}
-
-	sD.SubDistrictId = int(currentId)
+	sD.SubDistrictId = subDistrictId
 	return sD, nil
 }
 
-func (sD *SubDistrict) FindSubDistrictById(subDistrictId int) (*SubDistrict, error) {
+func (sD *SubDistrict) FindSubDistrictById(subDistrictId string) (*SubDistrict, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		log.Printf("%s", err)
@@ -109,13 +107,13 @@ func (sD *SubDistrict) FindSubDistrictById(subDistrictId int) (*SubDistrict, err
 	}
 
 	if sD == (&SubDistrict{}) {
-		return &SubDistrict{}, errors.New(fmt.Sprintf("Can't find sub-district with id: %d", subDistrictId))
+		return &SubDistrict{}, errors.New(fmt.Sprintf("Can't find sub-district with id: %v", subDistrictId))
 	}
 
 	return sD, nil
 }
 
-func (sD *SubDistrict) UpdateSubDistrictById(subDistrictId int) (*SubDistrict, error) {
+func (sD *SubDistrict) UpdateSubDistrictById(subDistrictId string) (*SubDistrict, error) {
 	db, err := utility.ConnectDB()
 	if err != nil || sD.SubDistrictId != subDistrictId {
 		return &SubDistrict{}, errors.New("Somethings wrong!")
@@ -148,7 +146,7 @@ func (sD *SubDistrict) UpdateSubDistrictById(subDistrictId int) (*SubDistrict, e
 	return sD, nil
 }
 
-func (sD *SubDistrict) DeleteSubDistrictById(subDistrictId int) (bool, error) {
+func (sD *SubDistrict) DeleteSubDistrictById(subDistrictId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, errors.New("Somethings wrong!")

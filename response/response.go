@@ -75,7 +75,7 @@ type ResponseCities struct {
 type ResponseCitiesByProvinceId struct {
 	StatusCode     int            `json:"statusCode"`
 	Message        string         `json:"message"`
-	ProvinceId     int            `json:"provinceId"`
+	ProvinceId     string         `json:"provinceId"`
 	Cities         []*model.City  `json:"cities"`
 	InfoPagination InfoPagination `json:"infoPagination"`
 	NextPage       string         `json:"nextPage"`
@@ -125,7 +125,7 @@ type ResponseSubDistricts struct {
 type ResponseSubDistrictsByCityId struct {
 	StatusCode     int                  `json:"statusCode"`
 	Message        string               `json:"message"`
-	CityId         int                  `json:"cityId"`
+	CityId         string               `json:"cityId"`
 	SubDistricts   []*model.SubDistrict `json:"subDistricts"`
 	InfoPagination InfoPagination       `json:"infoPagination"`
 	NextPage       string               `json:"nextPage"`

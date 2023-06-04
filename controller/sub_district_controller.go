@@ -9,15 +9,15 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/sinulingga23/sales-backend/model"
 	"github.com/sinulingga23/sales-backend/response"
 	"github.com/sinulingga23/sales-backend/utility"
 )
 
 func GetSubDistrictById(c *gin.Context) {
-	subDistrictId := 0
-
-	subDistrictId, err := strconv.Atoi(c.Param("subDistrictId"))
+	subDistrictId := c.Param("subDistrictId")
+	_, err := uuid.Parse(subDistrictId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
@@ -89,11 +89,12 @@ func CreateSubDistrict(c *gin.Context) {
 		return
 	}
 
-	if requestSubDistrict.CityId < 0 {
+	_, err = uuid.Parse(requestSubDistrict.CityId)
+	if err != nil {
 		c.JSON(http.StatusNotFound, response.ResponseErrors{
 			StatusCode: http.StatusNotFound,
 			Message:    "Somethings wrong!",
-			Errors:     fmt.Sprintf("The City with id %d is not exists.", requestSubDistrict.CityId),
+			Errors:     fmt.Sprintf("The City with id %v is not exists.", requestSubDistrict.CityId),
 		})
 		return
 	}
@@ -155,7 +156,6 @@ func CreateSubDistrict(c *gin.Context) {
 }
 
 func UpdateSubDistrictById(c *gin.Context) {
-	subDistrictId := 0
 	requestSubDistrict := model.SubDistrict{}
 	cityModel := model.City{}
 
@@ -169,7 +169,8 @@ func UpdateSubDistrictById(c *gin.Context) {
 		return
 	}
 
-	subDistrictId, err = strconv.Atoi(c.Param("subDistrictId"))
+	subDistrictId := c.Param("subDistrictId")
+	_, err = uuid.Parse(subDistrictId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseGeneric{
 			StatusCode: http.StatusBadRequest,
@@ -179,7 +180,7 @@ func UpdateSubDistrictById(c *gin.Context) {
 		return
 	}
 
-	if subDistrictId != requestSubDistrict.SubDistrictId || (subDistrictId <= 0 || requestSubDistrict.SubDistrictId <= 0) {
+	if subDistrictId != requestSubDistrict.SubDistrictId {
 		c.JSON(http.StatusBadRequest, response.ResponseGeneric{
 			StatusCode: http.StatusBadRequest,
 			Message:    "Invalid format!",
@@ -287,9 +288,9 @@ func UpdateSubDistrictById(c *gin.Context) {
 }
 
 func DeleteSubDistrictById(c *gin.Context) {
-	subDistrictId := 0
 
-	subDistrictId, err := strconv.Atoi(c.Param("subDistrictId"))
+	subDistrictId := c.Param("subDistrictId")
+	_, err := uuid.Parse(subDistrictId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,

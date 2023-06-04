@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/sinulingga23/sales-backend/model"
 	"github.com/sinulingga23/sales-backend/response"
 	"github.com/sinulingga23/sales-backend/utility"
@@ -16,9 +17,9 @@ import (
 )
 
 func GetProvinceById(c *gin.Context) {
-	provinceId := 0
 
-	provinceId, err := strconv.Atoi(c.Param("provinceId"))
+	provinceId := c.Param("provinceId")
+	_, err := uuid.Parse(provinceId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
@@ -121,7 +122,6 @@ func CreateProvince(c *gin.Context) {
 }
 
 func UpdateProvinceById(c *gin.Context) {
-	provinceId := 0
 	requestProvince := model.Province{}
 
 	err := c.Bind(&requestProvince)
@@ -133,7 +133,8 @@ func UpdateProvinceById(c *gin.Context) {
 		return
 	}
 
-	provinceId, err = strconv.Atoi(c.Param("provinceId"))
+	provinceId := c.Param("provinceId")
+	_, err = uuid.Parse(provinceId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
@@ -147,22 +148,6 @@ func UpdateProvinceById(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response.ResponseGeneric{
 			StatusCode: http.StatusBadRequest,
 			Message:    "Invalid format!",
-		})
-		return
-	}
-
-	if provinceId == 0 || requestProvince.ProvinceId == 0 {
-		c.JSON(http.StatusBadRequest, response.ResponseGeneric{
-			StatusCode: http.StatusBadRequest,
-			Message:    "ProvinceId can't be zero",
-		})
-		return
-	}
-
-	if requestProvince.Province == "" {
-		c.JSON(http.StatusBadRequest, response.ResponseGeneric{
-			StatusCode: http.StatusBadRequest,
-			Message:    "Province can't be empty",
 		})
 		return
 	}
@@ -228,9 +213,9 @@ func UpdateProvinceById(c *gin.Context) {
 }
 
 func DeleteProvinceById(c *gin.Context) {
-	provinceId := 0
 
-	provinceId, err := strconv.Atoi(c.Param("provinceId"))
+	provinceId := c.Param("provinceId")
+	_, err := uuid.Parse(provinceId)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
@@ -365,7 +350,6 @@ func GetProvinces(c *gin.Context) {
 func GetCitiesByProvinceId(c *gin.Context) {
 	requestPage := c.DefaultQuery("page", "1")
 	requestLimit := c.DefaultQuery("limit", "10")
-	provinceId := 0
 
 	page := 0
 	page, err := strconv.Atoi(requestPage)
@@ -389,7 +373,9 @@ func GetCitiesByProvinceId(c *gin.Context) {
 		return
 	}
 
-	provinceId, err = strconv.Atoi(c.Param("provinceId"))
+	provinceId := c.Param("provinceId")
+	_, err = uuid.Parse(provinceId)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
@@ -428,7 +414,7 @@ func GetCitiesByProvinceId(c *gin.Context) {
 			return
 		}
 
-		nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"provinces", strconv.Itoa(provinceId), "cities"}, &page, &limit, numberRecordsCity)
+		nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"provinces", provinceId, "cities"}, &page, &limit, numberRecordsCity)
 		offset := limit * (page - 1)
 
 		cities, err := provinceModel.FindAllCityByProvinceId(provinceId, limit, offset)

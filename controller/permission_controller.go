@@ -3,10 +3,10 @@ package controller
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/sinulingga23/sales-backend/model"
 	"github.com/sinulingga23/sales-backend/response"
 
@@ -14,19 +14,10 @@ import (
 )
 
 func GetPermisisonById(c *gin.Context) {
-	permissionId := 0
 
-	permissionId, err := strconv.Atoi(c.Param("permissionId"))
+	permissionId := c.Param("permissionId")
+	_, err := uuid.Parse(permissionId)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.ResponseErrors{
-			StatusCode: http.StatusBadRequest,
-			Message:    "Invalid Request",
-			Errors:     "Bad Request",
-		})
-		return
-	}
-
-	if permissionId <= 0 {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
 			Message:    "Invalid Request",
@@ -95,7 +86,8 @@ func CreatePermission(c *gin.Context) {
 		return
 	}
 
-	if requestPermission.RoleId <= 0 {
+	_, err = uuid.Parse(requestPermission.RoleId)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
 			Message:    "Invalid Request",

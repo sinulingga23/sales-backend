@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/sinulingga23/sales-backend/model"
 	"github.com/sinulingga23/sales-backend/response"
 )
@@ -46,7 +47,8 @@ func ValidateUser() gin.HandlerFunc {
 
 		// validate the RoleId is exists.
 		// This part will be repalce with associated struct
-		if requestUserRegister.RoleId <= 0 {
+		_, err = uuid.Parse(requestUserRegister.RoleId)
+		if err != nil {
 			isThereInvalid = true
 			listInvalid["err_role_id"] = "The RoleId is invalid"
 		} else {
@@ -68,13 +70,13 @@ func ValidateUser() gin.HandlerFunc {
 		}
 
 		// validate the ProvinceId is exists
-		if requestUserRegister.ProvinceId <= 0 {
+		_, err = uuid.Parse(requestUserRegister.ProvinceId)
+		if err != nil {
 			isThereInvalid = true
 			listInvalid["err_province_id"] = "The ProvinceId is invalid"
 		} else {
 			provinceModel := model.Province{}
-			var provinceId int = requestUserRegister.ProvinceId
-			isThereProvinceId, err := provinceModel.IsProvinceExistsById(provinceId)
+			isThereProvinceId, err := provinceModel.IsProvinceExistsById(requestUserRegister.ProvinceId)
 			if err != nil {
 				log.Printf("%s", err)
 				c.JSON(http.StatusInternalServerError, response.ResponseErrors{
@@ -92,13 +94,13 @@ func ValidateUser() gin.HandlerFunc {
 		}
 
 		// validate the CityId is exisst
-		if requestUserRegister.CityId <= 0 {
+		_, err = uuid.Parse(requestUserRegister.CityId)
+		if err != nil {
 			isThereInvalid = true
 			listInvalid["err_city_id"] = "The CityId is invalid"
 		} else {
 			cityModel := model.City{}
-			var cityId int = requestUserRegister.CityId
-			isThereCityId, err := cityModel.IsCityExistsById(cityId)
+			isThereCityId, err := cityModel.IsCityExistsById(requestUserRegister.CityId)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, response.ResponseErrors{
 					StatusCode: http.StatusInternalServerError,
@@ -115,7 +117,8 @@ func ValidateUser() gin.HandlerFunc {
 		}
 
 		// validate the SubDistrictId is exists
-		if requestUserRegister.SubDistrictId <= 0 {
+		_, err = uuid.Parse(requestUserRegister.SubDistrictId)
+		if err != nil {
 			isThereInvalid = true
 			listInvalid["err_sub_district_id"] = "The SubDistrictId is invalid"
 		} else {

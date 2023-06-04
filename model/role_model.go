@@ -3,16 +3,17 @@ package model
 import (
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/sinulingga23/sales-backend/utility"
 )
 
 type Role struct {
-	RoleId int    `json:"roleId"`
+	RoleId string `json:"roleId"`
 	Role   string `json:"role"`
 	Audit  Audit  `json:"audit"`
 }
 
-func (r *Role) IsRoleExistsById(roleId int) (bool, error) {
+func (r *Role) IsRoleExistsById(roleId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, err
@@ -31,7 +32,7 @@ func (r *Role) IsRoleExistsById(roleId int) (bool, error) {
 	return true, nil
 }
 
-func (r *Role) GetRoleById(roleId int) (string, error) {
+func (r *Role) GetRoleById(roleId string) (string, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return "", err
@@ -47,7 +48,7 @@ func (r *Role) GetRoleById(roleId int) (string, error) {
 	return role, nil
 }
 
-func (r *Role) FindRoleById(roleId int) (*Role, error) {
+func (r *Role) FindRoleById(roleId string) (*Role, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return &Role{}, err
@@ -74,21 +75,17 @@ func (r *Role) SaveRole() (*Role, error) {
 	}
 	defer db.Close()
 
-	result, err := db.Exec("INSERT INTO roles (role_name, created_at) VALUES (?, ?)", r.Role, r.Audit.CreatedAt)
+	roleId := uuid.NewString()
+	_, err = db.Exec("INSERT INTO roles (role_id, role_name, created_at) VALUES (?, ?)", roleId, r.Role, r.Audit.CreatedAt)
 	if err != nil {
 		return &Role{}, err
 	}
 
-	currentId, err := result.LastInsertId()
-	if err != nil {
-		return &Role{}, err
-	}
-
-	r.RoleId = int(currentId)
+	r.RoleId = roleId
 	return r, nil
 }
 
-func (r *Role) UpdateRoleById(roleId int) (*Role, error) {
+func (r *Role) UpdateRoleById(roleId string) (*Role, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return &Role{}, err
@@ -116,7 +113,7 @@ func (r *Role) UpdateRoleById(roleId int) (*Role, error) {
 	return r, nil
 }
 
-func (r *Role) DeleteRoleById(roleId int) (bool, error) {
+func (r *Role) DeleteRoleById(roleId string) (bool, error) {
 	db, err := utility.ConnectDB()
 	if err != nil {
 		return false, err
