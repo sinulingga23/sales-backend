@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -16,11 +18,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetProvinceById(c *gin.Context) {
+type provinceController struct {
+	provinceRepository model.ProvinceRepository
+}
+
+func NewProvinceController(
+	provinceRepository model.ProvinceRepository,
+) *provinceController {
+	return &provinceController{provinceRepository: provinceRepository}
+}
+
+func (controller *provinceController) GetProvinceById(c *gin.Context) {
+	serviceName := "province_serivce:get_province_by_id"
 
 	provinceId := c.Param("provinceId")
 	_, err := uuid.Parse(provinceId)
 	if err != nil {
+		log.Printf("%s: Err Parse: %v", serviceName, err)
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
 			Message:    "Invalid",
@@ -29,55 +43,42 @@ func GetProvinceById(c *gin.Context) {
 		return
 	}
 
-	provinceModel := model.Province{}
-	isThere, err := provinceModel.IsProvinceExistsById(provinceId)
+	currentProvince, err := controller.provinceRepository.FindProvinceById(provinceId)
 	if err != nil {
+		log.Printf("%s: Err Find Province By Id: %v", serviceName, err)
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, response.ResponseGeneric{
+				StatusCode: http.StatusNotFound,
+				Message:    "The province is not exists.",
+			})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, response.ResponseErrors{
 			StatusCode: http.StatusInternalServerError,
-			Message:    "The server can't handle the request",
+			Message:    "Somethings wrong!",
 			Errors:     fmt.Sprintf("%s", err),
 		})
 		return
 	}
 
-	if !isThere {
-		c.JSON(http.StatusNotFound, response.ResponseGeneric{
-			StatusCode: http.StatusNotFound,
-			Message:    "The province is not exists.",
+	if currentProvince != (&model.Province{}) {
+		c.JSON(http.StatusOK, response.ResponseProvince{
+			StatusCode: http.StatusOK,
+			Message:    "Success to get the province",
+			Province:   *currentProvince,
 		})
 		return
-	} else if isThere {
-		currentProvince, err := provinceModel.FindProvinceById(provinceId)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, response.ResponseErrors{
-				StatusCode: http.StatusInternalServerError,
-				Message:    "Somethings wrong!",
-				Errors:     fmt.Sprintf("%s", err),
-			})
-			return
-		}
-
-		if currentProvince != (&model.Province{}) {
-			c.JSON(http.StatusOK, response.ResponseProvince{
-				StatusCode: http.StatusOK,
-				Message:    "Success to get the province",
-				Province:   *currentProvince,
-			})
-			return
-		}
 	}
-	c.JSON(http.StatusInternalServerError, response.ResponseGeneric{
-		StatusCode: http.StatusInternalServerError,
-		Message:    "Somethings wrong!",
-	})
-	return
 }
 
-func CreateProvince(c *gin.Context) {
-	requestProvince := model.Province{}
+func (controller *provinceController) CreateProvince(c *gin.Context) {
+	serviceName := "province_serivce:create_province"
+
+	requestProvince := model.ProvinceRequest{}
 
 	err := c.Bind(&requestProvince)
 	if err != nil {
+		log.Printf("%s: Err Bind: %v", serviceName, err)
 		c.JSON(http.StatusBadRequest, response.ResponseErrors{
 			StatusCode: http.StatusBadRequest,
 			Message:    "Invalid Request",
@@ -92,36 +93,32 @@ func CreateProvince(c *gin.Context) {
 			Message:    "Province name can't be empty",
 		})
 		return
-	} else {
-		requestProvince.Audit.CreatedAt = time.Now().Format("2006-01-02 15:05:03")
-		createdProvince, err := requestProvince.SaveProvince()
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, response.ResponseErrors{
-				StatusCode: http.StatusInternalServerError,
-				Message:    "Somethings wrong!",
-				Errors:     fmt.Sprintf("%v", err),
-			})
-			return
-		}
-
-		if createdProvince != (&model.Province{}) {
-			c.JSON(http.StatusOK, response.ResponseProvince{
-				StatusCode: http.StatusOK,
-				Message:    "Success to create province.",
-				Province:   *createdProvince,
-			})
-			return
-		}
 	}
 
-	c.JSON(http.StatusInternalServerError, response.ResponseGeneric{
-		StatusCode: http.StatusInternalServerError,
-		Message:    "Somethings wrong!",
+	createdProvince, err := controller.provinceRepository.SaveProvince(model.Province{
+		Province: requestProvince.Province,
 	})
-	return
+	if err != nil {
+		log.Printf("%s: Err Save Province: %v", serviceName, err)
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors{
+			StatusCode: http.StatusInternalServerError,
+			Message:    "Somethings wrong!",
+			Errors:     fmt.Sprintf("%v", err),
+		})
+		return
+	}
+
+	if createdProvince != (&model.Province{}) {
+		c.JSON(http.StatusOK, response.ResponseProvince{
+			StatusCode: http.StatusOK,
+			Message:    "Success to create province.",
+			Province:   *createdProvince,
+		})
+		return
+	}
 }
 
-func UpdateProvinceById(c *gin.Context) {
+func (controller *provinceController) UpdateProvinceById(c *gin.Context) {
 	requestProvince := model.Province{}
 
 	err := c.Bind(&requestProvince)
@@ -152,8 +149,7 @@ func UpdateProvinceById(c *gin.Context) {
 		return
 	}
 
-	provinceModel := model.Province{}
-	isThere, err := provinceModel.IsProvinceExistsById(provinceId)
+	isThere, err := controller.provinceRepository.IsProvinceExistsById(provinceId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ResponseErrors{
 			StatusCode: http.StatusInternalServerError,
@@ -170,7 +166,7 @@ func UpdateProvinceById(c *gin.Context) {
 		})
 		return
 	} else if isThere {
-		currentProvince, err := provinceModel.FindProvinceById(provinceId)
+		currentProvince, err := controller.provinceRepository.FindProvinceById(provinceId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseGeneric{
 				StatusCode: http.StatusInternalServerError,
@@ -185,7 +181,7 @@ func UpdateProvinceById(c *gin.Context) {
 		timestamp := time.Now().Format("2006-01-02 15:05:03")
 		currentProvince.Audit.UpdatedAt = &timestamp
 
-		updatedProvince, err := currentProvince.UpdateProvinceById(provinceId)
+		updatedProvince, err := controller.provinceRepository.UpdateProvinceById(provinceId)
 		if err != nil {
 			log.Printf("%v", err)
 			c.JSON(http.StatusInternalServerError, response.ResponseGeneric{
@@ -212,7 +208,7 @@ func UpdateProvinceById(c *gin.Context) {
 	return
 }
 
-func DeleteProvinceById(c *gin.Context) {
+func (controller *provinceController) DeleteProvinceById(c *gin.Context) {
 
 	provinceId := c.Param("provinceId")
 	_, err := uuid.Parse(provinceId)
@@ -224,8 +220,7 @@ func DeleteProvinceById(c *gin.Context) {
 		return
 	}
 
-	provinceModel := model.Province{}
-	isThere, err := provinceModel.IsProvinceExistsById(provinceId)
+	isThere, err := controller.provinceRepository.IsProvinceExistsById(provinceId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ResponseErrors{
 			StatusCode: http.StatusInternalServerError,
@@ -242,7 +237,7 @@ func DeleteProvinceById(c *gin.Context) {
 		})
 		return
 	} else if isThere {
-		isDeleted, err := provinceModel.DeleteProvinceById(provinceId)
+		isDeleted, err := controller.provinceRepository.DeleteProvinceById(provinceId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseErrors{
 				StatusCode: http.StatusInternalServerError,
@@ -274,10 +269,9 @@ func DeleteProvinceById(c *gin.Context) {
 	return
 }
 
-func GetProvinces(c *gin.Context) {
+func (controller *provinceController) GetProvinces(c *gin.Context) {
 	requestPage := c.DefaultQuery("page", "1")
 	requestLimit := c.DefaultQuery("limit", "10")
-	provinceModel := model.Province{}
 
 	page := 0
 	page, err := strconv.Atoi(requestPage)
@@ -301,7 +295,7 @@ func GetProvinces(c *gin.Context) {
 		return
 	}
 
-	numberRecords, err := provinceModel.GetNumberRecords()
+	numberRecords, err := controller.provinceRepository.GetNumberRecords()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ResponseErrors{
 			StatusCode: http.StatusInternalServerError,
@@ -314,7 +308,7 @@ func GetProvinces(c *gin.Context) {
 	nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"provinces"}, &page, &limit, numberRecords)
 	offset := limit * (page - 1)
 
-	provinces, err := provinceModel.FindAllProvince(limit, offset)
+	provinces, err := controller.provinceRepository.FindAllProvince(limit, offset)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ResponseErrors{
 			StatusCode: http.StatusInternalServerError,
@@ -347,7 +341,7 @@ func GetProvinces(c *gin.Context) {
 	}
 }
 
-func GetCitiesByProvinceId(c *gin.Context) {
+func (controller *provinceController) GetCitiesByProvinceId(c *gin.Context) {
 	requestPage := c.DefaultQuery("page", "1")
 	requestLimit := c.DefaultQuery("limit", "10")
 
@@ -385,8 +379,7 @@ func GetCitiesByProvinceId(c *gin.Context) {
 		return
 	}
 
-	provinceModel := model.Province{}
-	isThere, err := provinceModel.IsProvinceExistsById(provinceId)
+	isThere, err := controller.provinceRepository.IsProvinceExistsById(provinceId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ResponseErrors{
 			StatusCode: http.StatusInternalServerError,
@@ -417,7 +410,7 @@ func GetCitiesByProvinceId(c *gin.Context) {
 		nextPage, prevPage, totalPages := utility.GetPaginateURL([]string{"provinces", provinceId, "cities"}, &page, &limit, numberRecordsCity)
 		offset := limit * (page - 1)
 
-		cities, err := provinceModel.FindAllCityByProvinceId(provinceId, limit, offset)
+		cities, err := controller.provinceRepository.FindAllCityByProvinceId(provinceId, limit, offset)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, response.ResponseErrors{
 				StatusCode: http.StatusInternalServerError,

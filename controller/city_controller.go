@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,7 +17,22 @@ import (
 	"github.com/sinulingga23/sales-backend/utility"
 )
 
-func GetCityById(c *gin.Context) {
+type cityController struct {
+	cityRepository     model.CityRepository
+	provinceRepository model.ProvinceRepository
+}
+
+func NewCityContoller(
+	cityRepository model.CityRepository,
+	provinceRepository model.ProvinceRepository,
+) *cityController {
+	return &cityController{
+		cityRepository:     cityRepository,
+		provinceRepository: provinceRepository,
+	}
+}
+
+func (controller *cityController) GetCityById(c *gin.Context) {
 
 	cityId := c.Param("cityId")
 	_, err := uuid.Parse(cityId)
@@ -30,55 +47,35 @@ func GetCityById(c *gin.Context) {
 		return
 	}
 
-	cityModel := model.City{}
-	isThere, err := cityModel.IsCityExistsById(cityId)
+	currentCity, err := controller.cityRepository.FindCityById(cityId)
 	if err != nil {
-		log.Printf("%s", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			c.JSON(http.StatusNotFound, response.ResponseGeneric{
+				StatusCode: http.StatusNotFound,
+				Message:    "The City is not exists",
+			})
+		}
+
 		c.JSON(http.StatusInternalServerError, response.ResponseErrors{
 			StatusCode: http.StatusInternalServerError,
-			Message:    "The server can't handle request",
+			Message:    "Somethings wrong!",
 			Errors:     fmt.Sprintf("%s", err),
 		})
 		return
 	}
 
-	if !isThere {
-		c.JSON(http.StatusNotFound, response.ResponseGeneric{
-			StatusCode: http.StatusNotFound,
-			Message:    "The City is not exists",
+	if currentCity != (&model.City{}) {
+		c.JSON(http.StatusOK, response.ResponseCity{
+			StatusCode: http.StatusOK,
+			Message:    "Success to get the city",
+			City:       *currentCity,
 		})
 		return
-	} else if isThere {
-		currentCity, err := cityModel.FindCityById(cityId)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, response.ResponseErrors{
-				StatusCode: http.StatusInternalServerError,
-				Message:    "Somethings wrong!",
-				Errors:     fmt.Sprintf("%s", err),
-			})
-			log.Printf("%s", err)
-			return
-		}
-
-		if currentCity != (&model.City{}) {
-			c.JSON(http.StatusOK, response.ResponseCity{
-				StatusCode: http.StatusOK,
-				Message:    "Success to get the city",
-				City:       *currentCity,
-			})
-			return
-		}
 	}
-	c.JSON(http.StatusInternalServerError, response.ResponseGeneric{
-		StatusCode: http.StatusInternalServerError,
-		Message:    "Somethings wrong!",
-	})
-	return
 }
 
-func CreateCity(c *gin.Context) {
+func (controller *cityController) CreateCity(c *gin.Context) {
 	requestCity := model.City{}
-	provinceModel := model.Province{}
 
 	err := c.Bind(&requestCity)
 	if err != nil {
@@ -87,7 +84,6 @@ func CreateCity(c *gin.Context) {
 			Message:    "Invalid Request",
 			Errors:     "Bad Request",
 		})
-		log.Printf("%s", err)
 		return
 	}
 
@@ -100,7 +96,7 @@ func CreateCity(c *gin.Context) {
 		})
 		return
 	}
-	isThereProvince, err := provinceModel.IsProvinceExistsById(requestCity.ProvinceId)
+	isThereProvince, err := controller.provinceRepository.IsProvinceExistsById(requestCity.ProvinceId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ResponseErrors{
 			StatusCode: http.StatusInternalServerError,
@@ -116,37 +112,27 @@ func CreateCity(c *gin.Context) {
 			Message:    "The province is not exists.",
 		})
 		return
-	} else if isThereProvince {
-		if strings.Trim(requestCity.City, " ") == "" {
-			c.JSON(http.StatusBadRequest, response.ResponseGeneric{
-				StatusCode: http.StatusBadRequest,
-				Message:    "City name can't be empty",
-			})
-			log.Printf("%s", err)
-			return
-		} else {
-			requestCity.Audit.CreatedAt = time.Now().Format("2006-01-02 15:05:03")
-			createdCity, err := requestCity.SaveCity()
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, response.ResponseErrors{
-					StatusCode: http.StatusInternalServerError,
-					Message:    "Somethings wrong!",
-					Errors:     fmt.Sprintf("%v", err),
-				})
-				log.Printf("%s", err)
-				return
-			}
+	}
 
-			if createdCity != (&model.City{}) {
-				c.JSON(http.StatusOK, response.ResponseCity{
-					StatusCode: http.StatusOK,
-					Message:    "Success to create a city.",
-					City:       *createdCity,
-				})
-				log.Printf("%s", err)
-				return
-			}
-		}
+	createdCity, err := controller.cityRepository.SaveCity(requestCity)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.ResponseErrors{
+			StatusCode: http.StatusInternalServerError,
+			Message:    "Somethings wrong!",
+			Errors:     fmt.Sprintf("%v", err),
+		})
+		log.Printf("%s", err)
+		return
+	}
+
+	if createdCity != (&model.City{}) {
+		c.JSON(http.StatusOK, response.ResponseCity{
+			StatusCode: http.StatusOK,
+			Message:    "Success to create a city.",
+			City:       *createdCity,
+		})
+		log.Printf("%s", err)
+		return
 	}
 
 	c.JSON(http.StatusInternalServerError, response.ResponseGeneric{
@@ -156,9 +142,8 @@ func CreateCity(c *gin.Context) {
 	return
 }
 
-func UpdateCityById(c *gin.Context) {
+func (controller *cityController) UpdateCityById(c *gin.Context) {
 	requestCity := model.City{}
-	provinceModel := model.Province{}
 
 	err := c.Bind(&requestCity)
 	if err != nil {
@@ -197,7 +182,7 @@ func UpdateCityById(c *gin.Context) {
 		return
 	}
 
-	isThereProvince, err := provinceModel.IsProvinceExistsById(requestCity.ProvinceId)
+	isThereProvince, err := controller.provinceRepository.IsProvinceExistsById(requestCity.ProvinceId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.ResponseErrors{
 			StatusCode: http.StatusInternalServerError,
@@ -214,9 +199,16 @@ func UpdateCityById(c *gin.Context) {
 		})
 		return
 	} else if isThereProvince {
-		cityModel := model.City{}
-		isThereCity, err := cityModel.IsCityExistsById(requestCity.CityId)
+		_, err := controller.cityRepository.IsCityExistsById(requestCity.CityId)
 		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				c.JSON(http.StatusNotFound, response.ResponseGeneric{
+					StatusCode: http.StatusNotFound,
+					Message:    "The City is not exists",
+				})
+				return
+			}
+
 			c.JSON(http.StatusInternalServerError, response.ResponseErrors{
 				StatusCode: http.StatusInternalServerError,
 				Message:    "The server can't handle the request",
@@ -225,57 +217,47 @@ func UpdateCityById(c *gin.Context) {
 			return
 		}
 
-		if !isThereCity {
-			c.JSON(http.StatusNotFound, response.ResponseGeneric{
-				StatusCode: http.StatusNotFound,
-				Message:    "The City is not exists",
+		currentCity, err := cityModel.FindCityById(cityId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, response.ResponseGeneric{
+				StatusCode: http.StatusInternalServerError,
+				Message:    fmt.Sprintf("%s", err),
+			})
+			log.Printf("%s", err)
+			return
+		}
+
+		if currentCity.Audit.CreatedAt != requestCity.Audit.CreatedAt {
+			c.JSON(http.StatusBadRequest, response.ResponseGeneric{
+				StatusCode: http.StatusBadRequest,
+				Message:    "Invalid field createdAt",
 			})
 			return
-		} else if isThereCity {
-			currentCity, err := cityModel.FindCityById(cityId)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, response.ResponseGeneric{
-					StatusCode: http.StatusInternalServerError,
-					Message:    fmt.Sprintf("%s", err),
-				})
-				log.Printf("%s", err)
-				return
-			}
+		}
 
-			if currentCity.Audit.CreatedAt != requestCity.Audit.CreatedAt {
-				c.JSON(http.StatusBadRequest, response.ResponseGeneric{
-					StatusCode: http.StatusBadRequest,
-					Message:    "Invalid field createdAt",
-				})
-				return
-			}
+		currentCity.CityId = requestCity.CityId
+		currentCity.ProvinceId = requestCity.ProvinceId
+		currentCity.City = requestCity.City
+		currentCity.Audit.CreatedAt = requestCity.Audit.CreatedAt
+		timestamp := time.Now().Format("2006-01-02 15:05:03")
+		currentCity.Audit.UpdatedAt = &timestamp
 
-			currentCity.CityId = requestCity.CityId
-			currentCity.ProvinceId = requestCity.ProvinceId
-			currentCity.City = requestCity.City
-			currentCity.Audit.CreatedAt = requestCity.Audit.CreatedAt
-			timestamp := time.Now().Format("2006-01-02 15:05:03")
-			currentCity.Audit.UpdatedAt = &timestamp
+		updatedCity, err := currentCity.UpdateCityById(cityId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, response.ResponseGeneric{
+				StatusCode: http.StatusInternalServerError,
+				Message:    "Somethings wrong!",
+			})
+			return
+		}
 
-			updatedCity, err := currentCity.UpdateCityById(cityId)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, response.ResponseGeneric{
-					StatusCode: http.StatusInternalServerError,
-					Message:    "Somethings wrong!",
-				})
-				log.Printf("%s", err)
-				return
-			}
-
-			if updatedCity != (&model.City{}) {
-				c.JSON(http.StatusOK, response.ResponseCity{
-					StatusCode: http.StatusOK,
-					Message:    "Success to update the city",
-					City:       *updatedCity,
-				})
-				log.Printf("%s", err)
-				return
-			}
+		if updatedCity != (&model.City{}) {
+			c.JSON(http.StatusOK, response.ResponseCity{
+				StatusCode: http.StatusOK,
+				Message:    "Success to update the city",
+				City:       *updatedCity,
+			})
+			return
 		}
 	}
 
@@ -286,7 +268,7 @@ func UpdateCityById(c *gin.Context) {
 	return
 }
 
-func DeleteCityById(c *gin.Context) {
+func (controller *cityController) DeleteCityById(c *gin.Context) {
 
 	cityId := c.Param("cityId")
 	_, err := uuid.Parse(cityId)
@@ -352,7 +334,7 @@ func DeleteCityById(c *gin.Context) {
 	return
 }
 
-func GetCities(c *gin.Context) {
+func (controller *cityController) GetCities(c *gin.Context) {
 	requestPage := c.DefaultQuery("page", "1")
 	requestLimit := c.DefaultQuery("limit", "10")
 	cityModel := model.City{}
@@ -425,7 +407,7 @@ func GetCities(c *gin.Context) {
 	return
 }
 
-func GetSubDistrictsByCityId(c *gin.Context) {
+func (controller *cityController) GetSubDistrictsByCityId(c *gin.Context) {
 	requestPage := c.DefaultQuery("page", "1")
 	requestLimit := c.DefaultQuery("limit", "10")
 

@@ -1,27 +1,37 @@
 package model
 
 import (
+	"database/sql"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
-	"github.com/sinulingga23/sales-backend/utility"
 )
 
-type Province struct {
-	ProvinceId string `json:"provinceId"`
-	Province   string `json:"province"`
-	Audit      Audit  `json:"audit"`
+type (
+	Province struct {
+		ProvinceId string `json:"provinceId"`
+		Province   string `json:"province"`
+		Audit      Audit  `json:"audit"`
+	}
+
+	ProvinceRequest struct {
+		Province string `json:"province"`
+	}
+)
+
+type ProvinceRepository struct {
+	db *sql.DB
 }
 
-func (p *Province) GetNumberRecords() (int, error) {
-	db, err := utility.ConnectDB()
-	if err != nil {
-		return 0, err
-	}
-	defer db.Close()
+func NewprovinceRepository(db *sql.DB) *ProvinceRepository {
+	return &ProvinceRepository{db: db}
+}
+
+func (repository *ProvinceRepository) GetNumberRecords() (int, error) {
 
 	numberRecords := 0
-	err = db.QueryRow("SELECT COUNT(province_id) FROM province").Scan(&numberRecords)
+	err := repository.db.QueryRow("SELECT COUNT(province_id) FROM province").Scan(&numberRecords)
 	if err != nil {
 		return 0, err
 	}
@@ -29,15 +39,9 @@ func (p *Province) GetNumberRecords() (int, error) {
 	return numberRecords, nil
 }
 
-func (p *Province) IsProvinceExistsById(provinceId string) (bool, error) {
-	db, err := utility.ConnectDB()
-	if err != nil {
-		return false, err
-	}
-	defer db.Close()
-
+func (repository *ProvinceRepository) IsProvinceExistsById(provinceId string) (bool, error) {
 	check := 0
-	err = db.QueryRow("SELECT COUNT(province_id) FROM province WHERE province_id = ?", provinceId).Scan(&check)
+	err := repository.db.QueryRow("SELECT COUNT(province_id) FROM province WHERE province_id = ?", provinceId).Scan(&check)
 	if err != nil {
 		return false, err
 	}
@@ -49,15 +53,11 @@ func (p *Province) IsProvinceExistsById(provinceId string) (bool, error) {
 	return true, nil
 }
 
-func (p *Province) SaveProvince() (*Province, error) {
-	db, err := utility.ConnectDB()
-	if err != nil {
-		return &Province{}, err
-	}
-	defer db.Close()
+func (repository *ProvinceRepository) SaveProvince(p Province) (*Province, error) {
+	p.Audit.CreatedAt = time.Now().Format("2006-01-02 15:05:03")
 
 	provinceId := uuid.NewString()
-	_, err = db.Exec("INSERT INTO province (province_id, province, created_at) VALUES (?, ?)",
+	_, err := repository.db.Exec("INSERT INTO province (province_id, province, created_at) VALUES (?, ?)",
 		provinceId,
 		p.Province,
 		p.Audit.CreatedAt)
@@ -67,17 +67,13 @@ func (p *Province) SaveProvince() (*Province, error) {
 	}
 
 	p.ProvinceId = provinceId
-	return p, nil
+	return &p, nil
 }
 
-func (p *Province) FindProvinceById(provinceId string) (*Province, error) {
-	db, err := utility.ConnectDB()
-	if err != nil {
-		return &Province{}, err
-	}
-	defer db.Close()
+func (repository *ProvinceRepository) FindProvinceById(provinceId string) (*Province, error) {
+	p := &Province{}
 
-	err = db.QueryRow("SELECT province_id, province, created_at, updated_at FROM province WHERE province_id = ?", provinceId).
+	err := repository.db.QueryRow("SELECT province_id, province, created_at, updated_at FROM province WHERE province_id = ?", provinceId).
 		Scan(&p.ProvinceId, &p.Province, &p.Audit.CreatedAt, &p.Audit.UpdatedAt)
 	if err != nil {
 		return &Province{}, err
@@ -90,14 +86,9 @@ func (p *Province) FindProvinceById(provinceId string) (*Province, error) {
 	return p, nil
 }
 
-func (p *Province) UpdateProvinceById(provinceId string) (*Province, error) {
-	db, err := utility.ConnectDB()
-	if err != nil {
-		return &Province{}, err
-	}
-	defer db.Close()
-
-	result, err := db.Exec("UPDATE province SET province = ?, created_at = ?, updated_at = ? WHERE province_id = ?",
+func (repository *ProvinceRepository) UpdateProvinceById(provinceId string) (*Province, error) {
+	p := &Province{}
+	result, err := repository.db.Exec("UPDATE province SET province = ?, created_at = ?, updated_at = ? WHERE province_id = ?",
 		p.Province,
 		p.Audit.CreatedAt,
 		p.Audit.UpdatedAt,
@@ -118,14 +109,8 @@ func (p *Province) UpdateProvinceById(provinceId string) (*Province, error) {
 	return p, nil
 }
 
-func (p *Province) DeleteProvinceById(provinceId string) (bool, error) {
-	db, err := utility.ConnectDB()
-	if err != nil {
-		return false, err
-	}
-	defer db.Close()
-
-	result, err := db.Exec("DELETE FROM province WHERE province_id = ?", provinceId)
+func (repository *ProvinceRepository) DeleteProvinceById(provinceId string) (bool, error) {
+	result, err := repository.db.Exec("DELETE FROM province WHERE province_id = ?", provinceId)
 	if err != nil {
 		return false, err
 	}
@@ -142,14 +127,8 @@ func (p *Province) DeleteProvinceById(provinceId string) (bool, error) {
 	return true, nil
 }
 
-func (p *Province) FindAllProvince(limit int, offset int) ([]*Province, error) {
-	db, err := utility.ConnectDB()
-	if err != nil {
-		return []*Province{}, err
-	}
-	defer db.Close()
-
-	rows, err := db.Query("SELECT province_id, province, created_at, updated_at FROM province LIMIT ? OFFSET ?", limit, offset)
+func (repository *ProvinceRepository) FindAllProvince(limit int, offset int) ([]*Province, error) {
+	rows, err := repository.db.Query("SELECT province_id, province, created_at, updated_at FROM province LIMIT ? OFFSET ?", limit, offset)
 	if err != nil {
 		return []*Province{}, errors.New("Somethings wrong!")
 	}
@@ -174,14 +153,8 @@ func (p *Province) FindAllProvince(limit int, offset int) ([]*Province, error) {
 	return result, nil
 }
 
-func (p *Province) FindAllCityByProvinceId(provinceId string, limit int, offset int) ([]*City, error) {
-	db, err := utility.ConnectDB()
-	if err != nil {
-		return []*City{}, err
-	}
-	defer db.Close()
-
-	rows, err := db.Query("SELECT c.city_id, c.province_id, c.city, c.created_at, c.updated_at FROM city c INNER JOIN province p ON c.province_id = p.province_id HAVING c.province_id = ? LIMIT ? OFFSET ?", provinceId, limit, offset)
+func (repository *ProvinceRepository) FindAllCityByProvinceId(provinceId string, limit int, offset int) ([]*City, error) {
+	rows, err := repository.db.Query("SELECT c.city_id, c.province_id, c.city, c.created_at, c.updated_at FROM city c INNER JOIN province p ON c.province_id = p.province_id HAVING c.province_id = ? LIMIT ? OFFSET ?", provinceId, limit, offset)
 	if err != nil {
 		return []*City{}, err
 	}

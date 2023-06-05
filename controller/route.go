@@ -1,12 +1,26 @@
 package controller
 
 import (
+	"log"
+
 	"github.com/sinulingga23/sales-backend/middleware"
+	"github.com/sinulingga23/sales-backend/model"
+	"github.com/sinulingga23/sales-backend/utility"
 
 	"github.com/gin-gonic/gin"
 )
 
 func RunServer() {
+	db, err := utility.ConnectDB()
+	if err != nil {
+		log.Fatalf("Err Connect To DB: %v", err)
+	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("Err When Close DB Connection: %v", err)
+		}
+	}()
+
 	router := gin.Default()
 
 	// cors
@@ -21,12 +35,15 @@ func RunServer() {
 	router.GET("api/category-products/:categoryProductId/products", GetAllProductByCategoryProductId)
 
 	// provinces
-	router.GET("api/provinces/:provinceId", GetProvinceById)
-	router.POST("api/provinces", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), CreateProvince)
-	router.PUT("api/provinces/:provinceId", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), UpdateProvinceById)
-	router.DELETE("api/provinces/:provinceId", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), DeleteProvinceById)
-	router.GET("api/provinces", GetProvinces)
-	router.GET("api/provinces/:provinceId/cities", GetCitiesByProvinceId)
+	provinceRepository := model.NewprovinceRepository(db)
+	provinceController := NewProvinceController(*provinceRepository)
+
+	router.GET("api/provinces/:provinceId", provinceController.GetProvinceById)
+	router.POST("api/provinces", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), provinceController.CreateProvince)
+	router.PUT("api/provinces/:provinceId", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), provinceController.UpdateProvinceById)
+	router.DELETE("api/provinces/:provinceId", middleware.ValidateTokenMiddleware(), middleware.ValidateAdminMiddleware(), provinceController.DeleteProvinceById)
+	router.GET("api/provinces", provinceController.GetProvinces)
+	router.GET("api/provinces/:provinceId/cities", provinceController.GetCitiesByProvinceId)
 
 	// cities
 	router.GET("api/cities/:cityId", GetCityById)
