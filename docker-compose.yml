@@ -36,6 +36,15 @@ services:
       - sales_backend
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - sales-backend
+  redis:
+    image: redis:6.2.11
+    container_name: redis-sales-backend
+    ports:
+      - "6379:6379"
+    networks:
+      - sales-backend
 
 networks:
   sales-backend:
