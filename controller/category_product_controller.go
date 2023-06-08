@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/sinulingga23/sales-backend/model"
+	"github.com/sinulingga23/sales-backend/pkg/monitoring"
 	"github.com/sinulingga23/sales-backend/response"
 	"github.com/sinulingga23/sales-backend/utility"
 
@@ -72,12 +73,23 @@ func GetCategoryProductById(c *gin.Context) {
 
 func CreateCategoryProduct(c *gin.Context) {
 	requestCategoryProduct := model.CategoryProduct{}
+	serviceName := "categorty_service:create_product"
+	now := time.Now()
 
 	if err := c.Bind(&requestCategoryProduct); err != nil {
 		c.JSON(http.StatusBadRequest, response.ResponseGeneric{
 			StatusCode: http.StatusBadRequest,
 			Message:    "Invalid request",
 		})
+
+		go func(metric *monitoring.Metric) {
+			metric.TotalRequestEndpoint.
+				WithLabelValues(serviceName, c.Request.Method, strconv.Itoa(http.StatusBadRequest)).
+				Inc()
+			metric.DurationRequestEndpoint.
+				WithLabelValues(serviceName, c.Request.Method, strconv.Itoa(http.StatusBadRequest)).
+				Observe(float64(time.Since(now).Nanoseconds()))
+		}(monitoring.M)
 		return
 	}
 
@@ -86,6 +98,15 @@ func CreateCategoryProduct(c *gin.Context) {
 			StatusCode: http.StatusBadRequest,
 			Message:    "Category name can't be empty",
 		})
+
+		go func(metric *monitoring.Metric) {
+			metric.TotalRequestEndpoint.
+				WithLabelValues(serviceName, c.Request.Method, strconv.Itoa(http.StatusBadRequest)).
+				Inc()
+			metric.DurationRequestEndpoint.
+				WithLabelValues(serviceName, c.Request.Method, strconv.Itoa(http.StatusBadRequest)).
+				Observe(float64(time.Since(now).Nanoseconds()))
+		}(monitoring.M)
 		return
 	} else {
 		requestCategoryProduct.Audit.CreatedAt = time.Now().Format("2006-01-02 15:05:03")
@@ -95,6 +116,15 @@ func CreateCategoryProduct(c *gin.Context) {
 				StatusCode: http.StatusInternalServerError,
 				Message:    fmt.Sprintf("%v", err),
 			})
+
+			go func(metric *monitoring.Metric) {
+				metric.TotalRequestEndpoint.
+					WithLabelValues(serviceName, c.Request.Method, strconv.Itoa(http.StatusInternalServerError)).
+					Inc()
+				metric.DurationRequestEndpoint.
+					WithLabelValues(serviceName, c.Request.Method, strconv.Itoa(http.StatusInternalServerError)).
+					Observe(float64(time.Since(now).Nanoseconds()))
+			}(monitoring.M)
 			return
 		}
 
@@ -103,6 +133,14 @@ func CreateCategoryProduct(c *gin.Context) {
 				StatusCode: http.StatusOK,
 				Message:    "Success to create category product",
 			})
+			go func(metric *monitoring.Metric) {
+				metric.TotalRequestEndpoint.
+					WithLabelValues(serviceName, c.Request.Method, strconv.Itoa(http.StatusOK)).
+					Inc()
+				metric.DurationRequestEndpoint.
+					WithLabelValues(serviceName, c.Request.Method, strconv.Itoa(http.StatusOK)).
+					Observe(float64(time.Since(now).Nanoseconds()))
+			}(monitoring.M)
 			return
 		}
 	}
@@ -111,6 +149,14 @@ func CreateCategoryProduct(c *gin.Context) {
 		StatusCode: http.StatusInternalServerError,
 		Message:    "Somethings wrong!",
 	})
+	go func(metric *monitoring.Metric) {
+		metric.TotalRequestEndpoint.
+			WithLabelValues(serviceName, c.Request.Method, strconv.Itoa(http.StatusInternalServerError)).
+			Inc()
+		metric.DurationRequestEndpoint.
+			WithLabelValues(serviceName, c.Request.Method, strconv.Itoa(http.StatusInternalServerError)).
+			Observe(float64(time.Since(now).Nanoseconds()))
+	}(monitoring.M)
 	return
 }
 

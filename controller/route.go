@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sinulingga23/sales-backend/middleware"
+	"github.com/sinulingga23/sales-backend/pkg/monitoring"
 
 	"github.com/gin-gonic/gin"
 )
@@ -12,9 +15,19 @@ func RunServer() {
 	// cors
 	router.Use(middleware.CORSMiddleware())
 
+	// metric
+	registry := prometheus.NewRegistry()
+	monitoring.M = monitoring.NewMetric(registry)
+
+	router.GET("/metrics", func(ctx *gin.Context) {
+		h := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
+		h.ServeHTTP(ctx.Writer, ctx.Request)
+	})
+
 	// category-products
 	router.GET("api/category-products/:categoryProductId", GetCategoryProductById)
-	router.POST("api/category-products", middleware.ValidateTokenMiddleware(), CreateCategoryProduct)
+	// router.POST("api/category-products", middleware.ValidateTokenMiddleware(), CreateCategoryProduct)
+	router.POST("api/category-products", CreateCategoryProduct)
 	router.PUT("api/category-products/:categoryProductId", middleware.ValidateTokenMiddleware(), UpdateCategoryProductById)
 	router.DELETE("api/category-products/:categoryProductId", middleware.ValidateTokenMiddleware(), DeleteCategoryProductById)
 	router.GET("api/category-products", GetAllCategoryProduct)

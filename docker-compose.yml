@@ -27,6 +27,15 @@ services:
       - "8085:8085"
     networks:
       - sales-backend
+  prometheus:
+    image: prom/prometheus:v2.37.6
+    container_name: prometheus-sales-backend
+    ports:
+      - "9090:9090"
+    depends_on:
+      - sales_backend
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
 
 networks:
   sales-backend:
